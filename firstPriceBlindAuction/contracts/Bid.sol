@@ -2,6 +2,8 @@
 pragma ton-solidity >= 0.35.0;
 pragma AbiHeader expire;
 
+import "Interfaces.sol";
+
 contract Bid {
 
     uint256 static public auctionRootPubKey;

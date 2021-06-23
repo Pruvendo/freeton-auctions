@@ -5,14 +5,17 @@ pragma AbiHeader expire;
 import "Auction.sol";
 import "Bid.sol";
 import "Giver.sol";
+import "Interfaces.sol";
 
 struct AuctionScenarioData {
     address auction;
+    uint256 auctionPubKey;
     address giver;
     uint startTime;
     uint biddingDuration;
     uint revealingDuration;
     address winnerBid;
+    bool ended;
 }
 
 contract AuctionRoot {
@@ -20,18 +23,22 @@ contract AuctionRoot {
     AuctionScenarioData[] public auctions;
 
     TvmCell static public auctionCode;
-    TvmCell static public auctionData;
-    TvmCell  public bidCode;
-    TvmCell  public giverCode;
+    TvmCell static public giverCode;
+    TvmCell static public bidCode;
 
-    constructor(TvmCell code, TvmCell data) public {
+    constructor(
+        TvmCell auctionCodeArg,
+        TvmCell giverCodeArg,
+        TvmCell bidCodeArg
+    ) public {
         // require(tvm.pubkey() != 0, 101);
         // require(msg.pubkey() == tvm.pubkey(), 102);
 
         tvm.accept();
 
-        auctionCode = code;
-        auctionData = data;
+        auctionCode = auctionCodeArg;
+        giverCode = giverCodeArg;
+        bidCode = bidCodeArg;
     }
 
     function startAuctionScenario(
@@ -57,11 +64,13 @@ contract AuctionRoot {
         address winnerBid;
         AuctionScenarioData auctionScenarioData = AuctionScenarioData(
             auctionAddress,
+            publicKey,
             giverAddress,
             startTime,
             biddingDuration,
             revealingDuration,
-            winnerBid
+            winnerBid,
+            false
         );
         auctions.push(auctionScenarioData);
         return auctions.length - 1;
@@ -69,11 +78,27 @@ contract AuctionRoot {
 
     function continueAuctionScenario(uint auctionId) public {
         require(auctionId < auctions.length, 102);
-        setWinner(auctions[auctionId]);
+        AuctionScenarioData auctionScenario = auctions[auctionId];
+        require(
+            tx.timestamp > (auctionScenario.startTime
+                + auctionScenario.biddingDuration
+                + auctionScenario.revealingDuration)
+        );
+        tvm.accept();
 
-        AuctionScenarioData auction = auctions[auctionId];
+        AucInterface(auctionScenario.auction).endAuction{callback: AuctionRoot.setWinner}();
 
         // transfer money <-> goods
+    }
+
+    function setWinner(address winnerBid, uint auctionId) public {
+        require(auctionId < auctions.length, 102);
+        AuctionScenarioData auctionScenario = auctions[auctionId];
+        require(auctionScenario.auctionPubKey == msg.pubkey(), 102);
+        require(auctionScenario.ended == false, 102);
+
+        auctionScenario.winnerBid = winnerBid;
+        auctionScenario.ended = true;
     }
 
     function deployAuction(
@@ -83,7 +108,7 @@ contract AuctionRoot {
         uint256 publicKey
     ) private inline returns (address newAuction) {
         // https://github.com/tonlabs/samples/blob/master/solidity/17_ContractProducer.md
-        newAuction = new Auction{
+        newAuction = new Auction {
             code: auctionCode,
             value: 10 ton,
             pubkey: publicKey,
@@ -91,35 +116,22 @@ contract AuctionRoot {
                 startTime: startTime,
                 biddingDuration: biddingDuration,
                 revealingDuration: revealingDuration,
+                bidCode: bidCode,
+                id: auctions.length,
                 rootPubKey: tvm.pubkey()
             }
         }();
-
-        auctions.push();
-        address giverAddress;
-        address winnerBid;
-        auctions[auctions.length - 1] = AuctionScenarioData(
-            newAuction,
-            giverAddress,
-            startTime,
-            biddingDuration,
-            revealingDuration,
-            winnerBid
-        );
     }
 
-    function deployGiver(uint prize) private inline returns (address) {
-        // https://github.com/tonlabs/samples/blob/master/solidity/17_ContractProducer.md
-    }
-
-    function setWinner(AuctionScenarioData auction) private inline {
-        require(
-            tx.timestamp > (auction.startTime
-                + auction.biddingDuration
-                + auction.revealingDuration)
-        );
-
-        //request to the Auction contract if the winner not known
+    function deployGiver(uint prize) private inline returns (address newGiver) {
+        newGiver = new Giver {
+            code: giverCode,
+            value: 10 ton,
+            pubkey: tvm.pubkey(),
+            varInit: {
+                prize: prize
+            }
+        }();
     }
 
     function renderHelloWorld() public pure returns (string) {
