@@ -32,33 +32,36 @@ def contract(pytestconfig):
         nickname = 'Root'
     )
 
-
-def test_hello(contract):
-    answer = contract.call_getter('renderHelloWorld')
-    assert eq('Hello World', answer)
-
-def test_deploy_auction(contract):
-    i = contract.call_method('startAuctionScenario', dict(
+@fixture
+def auction_contract(contract):
+    auction_address = contract.call_method('startAuctionScenario', dict(
         prize=100500,
         startTime=int(time.time()) + 10,
         biddingDuration=1,
         revealingDuration=1,
         publicKey='0x00'
     ))
-    auctions = contract.call_getter('auctions')
-    assert auctions[i]
-    LOGGER.debug(auctions[i])
+    # LOGGER.debug(auctions[i])
 
-    auction_address = auctions[i]['auction']
     ts4.Address.ensure_address(auction_address)
     ts4.register_nickname(auction_address, 'Auction')
     ts4.dispatch_messages()
-    contract2 = ts4.BaseContract(
+    return ts4.BaseContract(
         'Auction',
         ctor_params=None,
         address=auction_address,
         nickname='AuctionInstance'
     )
 
-    answer = contract2.call_getter('renderHelloWorld')
+@fixture
+def bid(auction_contract):
+    pass
+
+
+def test_hello(contract):
+    answer = contract.call_getter('renderHelloWorld')
+    assert eq('Hello World', answer)
+
+def test_deploy_auction(auction_contract):
+    answer = auction_contract.call_getter('renderHelloWorld')
     assert eq('Hello World', answer)

@@ -8,7 +8,6 @@ import "Giver.sol";
 import "Interfaces.sol";
 
 struct AuctionScenarioData {
-    address auction;
     uint256 auctionPubKey;
     address giver;
     uint startTime;
@@ -18,9 +17,9 @@ struct AuctionScenarioData {
     bool ended;
 }
 
-contract AuctionRoot {
+contract AuctionRoot is RootInterface {
 
-    AuctionScenarioData[] public auctions;
+    mapping(address => AuctionScenarioData) public auctions;
 
     TvmCell static public auctionCode;
     TvmCell static public giverCode;
@@ -47,14 +46,14 @@ contract AuctionRoot {
         uint biddingDuration,
         uint revealingDuration,
         uint256 publicKey
-    ) public returns (uint) {
+    ) public returns (address auctionAddress) {
         // require(msg.pubkey() == tvm.pubkey(), 102);
         require(startTime > tx.timestamp);
         require(biddingDuration > 0);
         require(revealingDuration > 0);
         tvm.accept();
 
-        address auctionAddress = deployAuction(
+        auctionAddress = deployAuction(
             startTime,
             biddingDuration,
             revealingDuration,
@@ -63,7 +62,6 @@ contract AuctionRoot {
         address giverAddress = deployGiver(prize);
         address winnerBid;
         AuctionScenarioData auctionScenarioData = AuctionScenarioData(
-            auctionAddress,
             publicKey,
             giverAddress,
             startTime,
@@ -72,13 +70,14 @@ contract AuctionRoot {
             winnerBid,
             false
         );
-        auctions.push(auctionScenarioData);
-        return auctions.length - 1;
+        auctions[auctionAddress] = auctionScenarioData;
+        return auctionAddress;
     }
 
-    function continueAuctionScenario(uint auctionId) public {
-        require(auctionId < auctions.length, 102);
-        AuctionScenarioData auctionScenario = auctions[auctionId];
+    function continueAuctionScenario(address auctionAddress) public {
+        // require(tvm.pubkey() == msg.pubkey(), 102);
+        require(auctions.exists(auctionAddress), 102);
+        AuctionScenarioData auctionScenario = auctions[auctionAddress];
         require(
             tx.timestamp > (auctionScenario.startTime
                 + auctionScenario.biddingDuration
@@ -86,14 +85,14 @@ contract AuctionRoot {
         );
         tvm.accept();
 
-        AucInterface(auctionScenario.auction).endAuction{callback: AuctionRoot.setWinner}();
+        AucInterface(auctionAddress).endAuction{callback: AuctionRoot.setWinner}();
 
         // transfer money <-> goods
     }
 
-    function setWinner(address winnerBid, uint auctionId) public {
-        require(auctionId < auctions.length, 102);
-        AuctionScenarioData auctionScenario = auctions[auctionId];
+    function setWinner(address winnerBid) override public {
+        require(auctions.exists(msg.sender), 102);
+        AuctionScenarioData auctionScenario = auctions[msg.sender];
         require(auctionScenario.auctionPubKey == msg.pubkey(), 102);
         require(auctionScenario.ended == false, 102);
 
@@ -117,7 +116,6 @@ contract AuctionRoot {
                 biddingDuration: biddingDuration,
                 revealingDuration: revealingDuration,
                 bidCode: bidCode,
-                id: auctions.length,
                 rootPubKey: tvm.pubkey()
             }
         }();

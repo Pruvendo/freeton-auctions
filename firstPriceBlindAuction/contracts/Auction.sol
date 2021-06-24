@@ -7,8 +7,11 @@ import "Interfaces.sol";
 
 struct BidData {
     address bid;
-    uint amount;
-    uint256 bidderPubKey;
+    uint256 value;
+    uint256 amount;
+    uint256 amountHash;
+    bytes amountSecret;
+    uint256 pubkey;
 }
 
 contract Auction is AucInterface {
@@ -16,11 +19,11 @@ contract Auction is AucInterface {
     uint static public startTime;
     uint static public biddingDuration;
     uint static public revealingDuration;
-    uint static public id;
     TvmCell static public bidCode;
     uint256 static public rootPubKey;
 
-    BidData[] public bids;
+    mapping(address => BidData) public bids;
+    BidData public winner;
 
     // constructor() public {
     //     // require(tvm.pubkey() != 0, 101);
@@ -31,16 +34,58 @@ contract Auction is AucInterface {
     //     tvm.accept();
     // }
 
-    function makeBid(uint256 encriptedAmount) public returns (address bid) {
+    function makeBid(uint256 amountHash) public returns (address bid) {
+        // require...
+        tvm.accept();
 
+        bid = new Bid{
+            code: bidCode,
+            value: msg.value,
+            pubkey: tvm.pubkey(),
+            varInit: {
+                rootPubKey: rootPubKey
+            }
+        }();
+
+        bids[msg.sender] = BidData(
+            bid,
+            msg.value,
+            0,
+            amountHash,
+            "",
+            msg.pubkey()
+        );
     }
 
-    function revealBid(uint256 secret) public {
-        
+    function revealBid(bytes signature, uint amount) public {
+        require(signature.length == 64, 200);
+        require(bids.exists(msg.sender), 102);
+        BidData bidData = bids[msg.sender];
+        require(bidData.pubkey == msg.pubkey(), 102);
+        require(tvm.checkSign(
+                bidData.amountHash,
+                signature.toSlice(),
+                bidData.pubkey
+            ), 201);
+
+        // TODO: require hash value is correct
+
+        bidData.amount = amount;
+        bidData.amountSecret = signature;
+
+        if (winner.bid.isNone()) {
+            winner = bidData;
+        } else {
+            if (winner.amount < bidData.amount) {
+                winner = bidData;
+            }
+        }
     }
 
-    function endAuction() override public responsible returns (address, uint) {
+    function endAuction() override public responsible returns (address) {
+        //reqire...
         
+        RootInterface(msg.sender).setWinner(winner.bid);
     }
 
     function renderHelloWorld() public pure returns (string) {

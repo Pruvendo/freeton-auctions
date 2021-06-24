@@ -6,7 +6,7 @@ import "Interfaces.sol";
 
 contract Bid {
 
-    uint256 static public auctionRootPubKey;
+    uint256 static public rootPubKey;
 
     // here can be any additional information
 
@@ -19,5 +19,9 @@ contract Bid {
 
     function transferTo(address destination) public {
         // auctionRoot or auction
+    }
+
+    function renderHelloWorld() public pure returns (string) {
+        return "Hello World";
     }
 }
