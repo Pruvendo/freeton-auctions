@@ -4,7 +4,7 @@ pragma AbiHeader expire;
 
 import "Interfaces.sol";
 
-contract Giver {
+contract Giver is GiverInterface {
     
     uint static public prize;
 
@@ -15,9 +15,9 @@ contract Giver {
         tvm.accept();
     }
 
-    function transferTo(address destination) public {
+    function transferTo(address destination) override external {
         require(msg.pubkey() == tvm.pubkey(), 102);
 
-
+        destination.transfer(0 ton, false, 128);
     }
 }

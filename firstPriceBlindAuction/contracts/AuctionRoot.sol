@@ -90,7 +90,7 @@ contract AuctionRoot is RootInterface {
         // transfer money <-> goods
     }
 
-    function setWinner(address winnerBid) override public {
+    function setWinner(address winnerBid) override external {
         require(auctions.exists(msg.sender), 102);
         AuctionScenarioData auctionScenario = auctions[msg.sender];
         require(auctionScenario.auctionPubKey == msg.pubkey(), 102);
@@ -106,7 +106,8 @@ contract AuctionRoot is RootInterface {
         uint revealingDuration,
         uint256 publicKey
     ) private inline returns (address newAuction) {
-        // https://github.com/tonlabs/samples/blob/master/solidity/17_ContractProducer.md
+        // require...
+
         newAuction = new Auction {
             code: auctionCode,
             value: 10 ton,
@@ -133,6 +134,7 @@ contract AuctionRoot is RootInterface {
     }
 
     function renderHelloWorld() public pure returns (string) {
+        require(msg.value == 0 ton, 200);
         return "Hello World";
     }
 }

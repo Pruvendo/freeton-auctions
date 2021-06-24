@@ -4,7 +4,7 @@ pragma AbiHeader expire;
 
 import "Interfaces.sol";
 
-contract Bid {
+contract Bid is BidInterface {
 
     uint256 static public rootPubKey;
 
@@ -17,8 +17,10 @@ contract Bid {
         tvm.accept();
     }
 
-    function transferTo(address destination) public {
-        // auctionRoot or auction
+    function transferTo(address destination) override external {
+        // require auctionRoot or auction
+
+        destination.transfer(0 ton, false, 128);
     }
 
     function renderHelloWorld() public pure returns (string) {

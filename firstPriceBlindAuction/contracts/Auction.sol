@@ -83,12 +83,25 @@ contract Auction is AucInterface {
     }
 
     function endAuction() override public responsible returns (address) {
-        //reqire...
+        //require...
         
         RootInterface(msg.sender).setWinner(winner.bid);
+    }
+
+    function takeBidBack(address destination) public {
+        require(bids.exists(msg.sender), 102);
+        BidData bidData = bids[msg.sender];
+        require(!winner.bid.isNone(), 102);
+        require(winner.pubkey != msg.pubkey(), 102);
+        require(bidData.pubkey == msg.pubkey(), 102);
+
+        tvm.accept();
+        BidInterface(bidData.bid).transferTo(destination);
     }
 
     function renderHelloWorld() public pure returns (string) {
         return "Hello World";
     }
+
+    receive() external pure {}
 }

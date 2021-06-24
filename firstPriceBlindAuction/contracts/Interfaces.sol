@@ -9,3 +9,11 @@ interface AucInterface {
 interface RootInterface {
     function setWinner(address winnerBid) external;
 }
+
+interface BidInterface {
+    function transferTo(address destination) external;
+}
+
+interface GiverInterface {
+    function transferTo(address destination) external;
+}
