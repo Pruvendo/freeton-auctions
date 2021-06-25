@@ -13,10 +13,16 @@ from constants import ROOT_PUB_KEY
 LOGGER = logging.getLogger(__name__)
 
 
-@fixture(scope="module")
-def contract(pytestconfig):
+@fixture(scope='function')
+def fix_path(pytestconfig):
     rootpath: pathlib.Path = pytestconfig.rootpath
     ts4.init(rootpath.joinpath('contracts/'), verbose = False)
+
+
+@fixture(scope="function")
+def contract(pytestconfig):
+    # rootpath: pathlib.Path = pytestconfig.rootpath
+    # ts4.init(rootpath.joinpath('contracts/'), verbose = False)
     auction_code = ts4.load_code_cell('Auction.tvc')
     giver_code = ts4.load_code_cell('Giver.tvc')
     bid_code = ts4.load_code_cell('Bid.tvc')
@@ -32,7 +38,7 @@ def contract(pytestconfig):
         nickname = 'Root'
     )
 
-@fixture(scope="module")
+@fixture(scope="function")
 def auction_contract(contract):
     # LOGGER.debug(dir(contract))
     auction_address = contract.call_method('startAuctionScenario', dict(

@@ -34,8 +34,9 @@ contract Auction is AucInterface {
     //     tvm.accept();
     // }
 
-    function makeBid(uint256 amountHash) public returns (address bid) {
+    function makeBid(uint256 amountHash) override external returns (address bid) {
         // require...
+        // require(1 == 2, 102);
         tvm.accept();
 
         bid = new Bid{

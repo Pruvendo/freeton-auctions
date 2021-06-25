@@ -4,6 +4,7 @@ pragma AbiHeader expire;
 
 interface AucInterface {
     function endAuction() external responsible returns (address);
+    function makeBid(uint256 amountHash) external returns (address bid);
 }
 
 interface RootInterface {
