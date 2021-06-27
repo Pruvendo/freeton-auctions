@@ -7,6 +7,7 @@ import "Interfaces.sol";
 contract Bid is BidInterface {
 
     uint256 static public rootPubKey;
+    uint static public b_id;
 
     // here can be any additional information
 

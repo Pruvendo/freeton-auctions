@@ -2,6 +2,8 @@
 import pathlib
 import time
 import logging
+import string
+import random
 
 import tonos_ts4.ts4 as ts4
 
@@ -22,3 +24,6 @@ def make_bid(amount_hash, auction_address, value, rootpath):
     )
     bidder.call_method('toBid')
     ts4.dispatch_messages()
+
+def generate_pubkey():
+    return '0x' + ''.join((random.choice(string.hexdigits) for i in range(64))).lower()

@@ -2,24 +2,26 @@
 import pathlib
 import time
 import logging
+import random
 
 import tonos_ts4.ts4 as ts4
 
 from pytest import fixture
 
-from constants import ROOT_PUB_KEY
+# from constants import ROOT_PUB_KEY
+from utils import generate_pubkey
 
 
 LOGGER = logging.getLogger(__name__)
 
 
-@fixture(scope='function')
+@fixture(scope='session')
 def fix_path(pytestconfig):
     rootpath: pathlib.Path = pytestconfig.rootpath
     ts4.init(rootpath.joinpath('contracts/'), verbose = False)
 
 
-@fixture(scope="function")
+@fixture(scope="session")
 def contract(pytestconfig):
     # rootpath: pathlib.Path = pytestconfig.rootpath
     # ts4.init(rootpath.joinpath('contracts/'), verbose = False)
@@ -32,13 +34,14 @@ def contract(pytestconfig):
             auctionCodeArg=auction_code,
             giverCodeArg=giver_code,
             bidCodeArg=bid_code,
+            rootIdArg=random.randint(0, 1000000)
         ),
-        pubkey=ROOT_PUB_KEY,
+        pubkey=generate_pubkey(),
         balance=100000000000,
         nickname = 'Root'
     )
 
-@fixture(scope="function")
+@fixture(scope="session")
 def auction_contract(contract):
     # LOGGER.debug(dir(contract))
     auction_address = contract.call_method('startAuctionScenario', dict(
@@ -46,28 +49,29 @@ def auction_contract(contract):
         startTime=int(time.time()) + 10,
         biddingDuration=1,
         revealingDuration=1,
-        publicKey=contract.public_key_,
+        publicKey=generate_pubkey(),
     ))
     # LOGGER.debug(auctions[i])
 
     ts4.Address.ensure_address(auction_address)
     ts4.register_nickname(auction_address, 'Auction')
     ts4.dispatch_messages()
-    return ts4.BaseContract(
+    res = ts4.BaseContract(
         'Auction',
         ctor_params=None,
         address=auction_address,
         nickname='AuctionInstance'
     )
+    ts4.dispatch_messages()
+    return res
 
-@fixture
+@fixture(scope='session')
 def bid(auction_contract):
     bid_address = auction_contract.call_method(
         'makeBid',
         dict(
             amountHash=0,
         ),
-        
     )
 
     ts4.Address.ensure_address(bid_address)
@@ -77,5 +81,5 @@ def bid(auction_contract):
         'Bid',
         ctor_params=None,
         address=bid_address,
-        nickname='BidInstance'
+        # nickname='BidInstance'
     )

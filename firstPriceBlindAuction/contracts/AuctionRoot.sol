@@ -20,6 +20,9 @@ struct AuctionScenarioData {
 contract AuctionRoot is RootInterface {
 
     mapping(address => AuctionScenarioData) public auctions;
+    uint public number_of_auctions;
+    
+    uint static public rootId;
 
     TvmCell static public auctionCode;
     TvmCell static public giverCode;
@@ -28,7 +31,8 @@ contract AuctionRoot is RootInterface {
     constructor(
         TvmCell auctionCodeArg,
         TvmCell giverCodeArg,
-        TvmCell bidCodeArg
+        TvmCell bidCodeArg,
+        uint rootIdArg
     ) public {
         // require(tvm.pubkey() != 0, 101);
         // require(msg.pubkey() == tvm.pubkey(), 102);
@@ -38,6 +42,7 @@ contract AuctionRoot is RootInterface {
         auctionCode = auctionCodeArg;
         giverCode = giverCodeArg;
         bidCode = bidCodeArg;
+        rootId = rootIdArg;
     }
 
     function startAuctionScenario(
@@ -117,9 +122,11 @@ contract AuctionRoot is RootInterface {
                 biddingDuration: biddingDuration,
                 revealingDuration: revealingDuration,
                 bidCode: bidCode,
-                rootPubKey: tvm.pubkey()
+                rootPubKey: tvm.pubkey(),
+                a_id: number_of_auctions
             }
         }();
+        number_of_auctions += 1;
     }
 
     function deployGiver(uint prize) private inline returns (address newGiver) {

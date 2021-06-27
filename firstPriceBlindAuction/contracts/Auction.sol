@@ -16,6 +16,8 @@ struct BidData {
 
 contract Auction is AucInterface {
 
+    uint public number_of_bids;
+    uint static public a_id;
     uint static public startTime;
     uint static public biddingDuration;
     uint static public revealingDuration;
@@ -44,9 +46,11 @@ contract Auction is AucInterface {
             value: msg.value,
             pubkey: tvm.pubkey(),
             varInit: {
-                rootPubKey: rootPubKey
+                rootPubKey: rootPubKey,
+                b_id: number_of_bids
             }
         }();
+        number_of_bids = number_of_bids + 1;
 
         bids[msg.sender] = BidData(
             bid,
