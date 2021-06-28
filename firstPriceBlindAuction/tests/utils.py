@@ -4,6 +4,7 @@ import time
 import logging
 import string
 import random
+random.seed(0)
 
 import tonos_ts4.ts4 as ts4
 

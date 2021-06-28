@@ -22,4 +22,4 @@ def test_scenario(auction_contract, pytestconfig):
     make_bid('0', auction_contract.address, 10**9, pytestconfig.rootpath)
     make_bid('0', auction_contract.address, 2 * 10**9, pytestconfig.rootpath)
     assert 2 == auction_contract.call_getter('number_of_bids')
-    sleep(1)
+    # sleep(1)

@@ -3,6 +3,7 @@ import pathlib
 import time
 import logging
 import random
+random.seed(0)
 
 import tonos_ts4.ts4 as ts4
 
