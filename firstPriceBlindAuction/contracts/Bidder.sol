@@ -22,9 +22,19 @@ contract Bidder {
 
     function toBid() public {
         tvm.accept();
+
+        uint128 val = msg.value + address(this).balance - (2 ton);
+
         AucInterface(auction).makeBid{
-            value: 0 ton,
-            flag: 128 + 64
+            value: val
         }(amountHash);
+    }
+
+    function toReveal(uint amount) public {
+        tvm.accept();
+        AucInterface(auction).revealBid(
+            "0000000000000000000000000000000000000000000000000000000000000000",
+            amount
+        );
     }
 }

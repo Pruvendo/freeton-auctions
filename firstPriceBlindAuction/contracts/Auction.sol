@@ -62,16 +62,16 @@ contract Auction is AucInterface {
         );
     }
 
-    function revealBid(bytes signature, uint amount) public {
+    function revealBid(bytes signature, uint amount) override external {
         require(signature.length == 64, 200);
         require(bids.exists(msg.sender), 102);
         BidData bidData = bids[msg.sender];
         require(bidData.pubkey == msg.pubkey(), 102);
-        require(tvm.checkSign(
-                bidData.amountHash,
-                signature.toSlice(),
-                bidData.pubkey
-            ), 201);
+        // require(tvm.checkSign(
+        //         bidData.amountHash,
+        //         signature.toSlice(),
+        //         bidData.pubkey
+        //     ), 201);
 
         // TODO: require hash value is correct
 
@@ -87,7 +87,7 @@ contract Auction is AucInterface {
         }
     }
 
-    function endAuction() override public responsible returns (address) {
+    function endAuction() override public returns (address) {
         //require...
         
         RootInterface(msg.sender).setWinner(winner.bid);

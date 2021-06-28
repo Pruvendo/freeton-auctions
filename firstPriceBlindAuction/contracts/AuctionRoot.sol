@@ -28,6 +28,8 @@ contract AuctionRoot is RootInterface {
     TvmCell static public giverCode;
     TvmCell static public bidCode;
 
+    event Debug(bool ended);
+
     constructor(
         TvmCell auctionCodeArg,
         TvmCell giverCodeArg,
@@ -54,8 +56,8 @@ contract AuctionRoot is RootInterface {
     ) public returns (address auctionAddress) {
         // require(msg.pubkey() == tvm.pubkey(), 102);
         require(startTime > tx.timestamp);
-        require(biddingDuration > 0);
-        require(revealingDuration > 0);
+        // require(biddingDuration > 0);
+        // require(revealingDuration > 0);
         tvm.accept();
 
         auctionAddress = deployAuction(
@@ -81,28 +83,33 @@ contract AuctionRoot is RootInterface {
 
     function continueAuctionScenario(address auctionAddress) public {
         // require(tvm.pubkey() == msg.pubkey(), 102);
-        require(auctions.exists(auctionAddress), 102);
+        require(auctions.exists(auctionAddress), 199);
         AuctionScenarioData auctionScenario = auctions[auctionAddress];
-        require(
-            tx.timestamp > (auctionScenario.startTime
-                + auctionScenario.biddingDuration
-                + auctionScenario.revealingDuration)
-        );
+        require(auctionScenario.ended == false, 194);
+        // require(
+        //     tx.timestamp > (auctionScenario.startTime
+        //         + auctionScenario.biddingDuration
+        //         + auctionScenario.revealingDuration)
+        // );
         tvm.accept();
 
-        AucInterface(auctionAddress).endAuction{callback: AuctionRoot.setWinner}();
-
-        // transfer money <-> goods
+        AucInterface(auctionAddress).endAuction();
     }
 
     function setWinner(address winnerBid) override external {
-        require(auctions.exists(msg.sender), 102);
-        AuctionScenarioData auctionScenario = auctions[msg.sender];
-        require(auctionScenario.auctionPubKey == msg.pubkey(), 102);
-        require(auctionScenario.ended == false, 102);
+        require(auctions.exists(msg.sender), 198);
+        // require(auctionScenario.auctionPubKey == msg.pubkey(), 197);
+        // emit Debug(auctions[msg.sender].ended);
+        require(auctions[msg.sender].ended == false, 150);
+        // AuctionScenarioData auctionScenario = auctions[msg.sender];
+        // require(auctionScenario.ended == false, 194);
+        tvm.accept();
 
-        auctionScenario.winnerBid = winnerBid;
-        auctionScenario.ended = true;
+        auctions[msg.sender].winnerBid = winnerBid;
+
+        // transfer money <-> goods
+
+        auctions[msg.sender].ended = true;
     }
 
     function deployAuction(

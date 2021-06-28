@@ -10,6 +10,6 @@ tondev sol compile Bidder.sol;
 tondev sol compile Giver.sol;
 cd ..
 set +e
-pytest -o log_cli=true tests/;
+pytest -x tests/;
 rm contracts/*json;
 rm contracts/*tvc;

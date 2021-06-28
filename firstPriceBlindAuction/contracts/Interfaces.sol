@@ -3,8 +3,9 @@ pragma ton-solidity >= 0.35.0;
 pragma AbiHeader expire;
 
 interface AucInterface {
-    function endAuction() external responsible returns (address);
+    function endAuction() external returns (address);
     function makeBid(uint256 amountHash) external returns (address bid);
+    function revealBid(bytes signature, uint amount) external;
 }
 
 interface RootInterface {

@@ -1,5 +1,4 @@
 # pyright: reportMissingImports=false
-import pathlib
 import time
 import logging
 import string
@@ -9,7 +8,9 @@ random.seed(0)
 import tonos_ts4.ts4 as ts4
 
 
-def make_bid(amount_hash, auction_address, value, rootpath):
+owners_bidder = {}
+
+def make_bid(amount_hash, auction_address, value, owner):
     # ts4.init(rootpath.joinpath('contracts/'), verbose = False)
     ts4.Address.ensure_address(auction_address)
     ts4.dispatch_messages()
@@ -21,10 +22,21 @@ def make_bid(amount_hash, auction_address, value, rootpath):
         ),
         pubkey='0xaa1787d058eafdf4453274b063e4ddfb05492ddc1b01e91d06681466f35475eb',
         balance=value,
-        nickname = 'Bidder'
     )
     bidder.call_method('toBid')
     ts4.dispatch_messages()
+    owners_bidder[owner] = bidder
+
+def reveal_bid(amount, owner):
+    ts4.dispatch_messages()
+    bidder = owners_bidder[owner]
+    bidder.call_method(
+        'toReveal',
+        dict(
+            amount=amount,
+        ),
+    )
+    ts4.dispatch_messages()
 
 def generate_pubkey():
-    return '0x' + ''.join((random.choice(string.hexdigits) for i in range(64))).lower()
+    return '0x' + ''.join((random.choice(string.hexdigits) for _ in range(64))).lower()

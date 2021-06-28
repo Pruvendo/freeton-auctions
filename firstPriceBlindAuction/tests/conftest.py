@@ -23,7 +23,7 @@ def fix_path(pytestconfig):
 
 
 @fixture(scope="session")
-def contract(pytestconfig):
+def root_contract():
     # rootpath: pathlib.Path = pytestconfig.rootpath
     # ts4.init(rootpath.joinpath('contracts/'), verbose = False)
     auction_code = ts4.load_code_cell('Auction.tvc')
@@ -43,9 +43,9 @@ def contract(pytestconfig):
     )
 
 @fixture(scope="session")
-def auction_contract(contract):
+def auction_contract(root_contract):
     # LOGGER.debug(dir(contract))
-    auction_address = contract.call_method('startAuctionScenario', dict(
+    auction_address = root_contract.call_method('startAuctionScenario', dict(
         prize=100500,
         startTime=int(time.time()) + 10,
         biddingDuration=1,

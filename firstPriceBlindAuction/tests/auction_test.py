@@ -10,8 +10,8 @@ eq = ts4.eq
 LOGGER = logging.getLogger(__name__)
 
 @pytest.mark.order(1)
-def test_hello(contract):
-    answer = contract.call_getter('renderHelloWorld')
+def test_hello(root_contract):
+    answer = root_contract.call_getter('renderHelloWorld')
     assert eq('Hello World', answer)
 
 @pytest.mark.order(2)
