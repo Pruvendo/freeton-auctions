@@ -28,8 +28,6 @@ contract AuctionRoot is RootInterface {
     TvmCell static public giverCode;
     TvmCell static public bidCode;
 
-    event Debug(bool ended);
-
     constructor(
         TvmCell auctionCodeArg,
         TvmCell giverCodeArg,
