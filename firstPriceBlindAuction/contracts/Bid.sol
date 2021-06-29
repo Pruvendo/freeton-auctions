@@ -9,6 +9,9 @@ contract Bid is BidInterface {
     uint256 static public rootPubKey;
     uint static public b_id;
 
+    uint128 public amount;
+    bool public frozen;
+
     // here can be any additional information
 
     constructor() public {
@@ -16,12 +19,18 @@ contract Bid is BidInterface {
         // require(msg.pubkey() == tvm.pubkey(), 102);
 
         tvm.accept();
+        frozen = true;
     }
 
-    function transferTo(address destination) override external {
-        // require auctionRoot or auction
+    function unfreeze(uint128 amountArg) override external {
+        amount = amountArg;
+        frozen = false;
+    }
 
-        destination.transfer(0 ton, false, 128);
+    function transferRemainsTo(address destination) override external {
+        // require auctionRoot or auction
+        require(!frozen);
+        destination.transfer(address(this).balance - amount - 1 ton, false);
     }
 
     function renderHelloWorld() public pure returns (string) {

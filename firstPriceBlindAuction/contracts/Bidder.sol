@@ -30,11 +30,18 @@ contract Bidder {
         }(amountHash);
     }
 
-    function toReveal(uint amount) public {
+    function toReveal(uint128 amount) public {
         tvm.accept();
         AucInterface(auction).revealBid(
             "0000000000000000000000000000000000000000000000000000000000000000",
             amount
         );
+    }
+
+    function takeBidBack() public {
+        //require...
+
+        tvm.accept();
+        AucInterface(auction).takeBidBack(this);
     }
 }

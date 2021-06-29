@@ -7,7 +7,7 @@ import pytest
 
 from time import sleep
 
-from utils import make_bid, reveal_bid
+from utils import make_bid, reveal_bid, take_bid_back, balance
 
 
 eq = ts4.eq
@@ -38,7 +38,15 @@ def test_scenario(auction_contract, root_contract):
         )
     )
     ts4.dispatch_messages()
+    winner = auction_contract.call_getter('winner')
     auctions = root_contract.call_getter('auctions')
     assert len(auctions) == 1
     assert list(auctions.values())[0]['ended'] == True
     assert list(auctions.values())[0]['winnerBid'] == winner['bid']
+    
+    LOGGER.debug(winner)
+    take_bid_back('Petya')
+    take_bid_back('Vasya')
+    LOGGER.debug(balance('Petya'))
+    assert abs(2 * 10**11 - balance('Petya')) < 2 * 10**9
+    assert abs((10**11 - 2 * 10**10) - balance('Vasya')) < 2 * 10**9

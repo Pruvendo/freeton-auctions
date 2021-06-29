@@ -7,8 +7,8 @@ import "Interfaces.sol";
 
 struct BidData {
     address bid;
-    uint256 value;
-    uint256 amount;
+    uint128 value;
+    uint128 amount;
     uint256 amountHash;
     bytes amountSecret;
     uint256 pubkey;
@@ -62,7 +62,7 @@ contract Auction is AucInterface {
         );
     }
 
-    function revealBid(bytes signature, uint amount) override external {
+    function revealBid(bytes signature, uint128 amount) override external {
         require(signature.length == 64, 200);
         require(bids.exists(msg.sender), 102);
         BidData bidData = bids[msg.sender];
@@ -79,9 +79,12 @@ contract Auction is AucInterface {
         bidData.amountSecret = signature;
 
         if (winner.bid.isNone()) {
+            BidInterface(bidData.bid).unfreeze(amount);
             winner = bidData;
         } else {
             if (winner.amount < bidData.amount) {
+                BidInterface(winner.bid).unfreeze(0);
+                BidInterface(bidData.bid).unfreeze(amount);
                 winner = bidData;
             }
         }
@@ -93,15 +96,15 @@ contract Auction is AucInterface {
         RootInterface(msg.sender).setWinner(winner.bid);
     }
 
-    function takeBidBack(address destination) public {
-        require(bids.exists(msg.sender), 102);
+    function takeBidBack(address destination) override external {
+        require(bids.exists(msg.sender), 101);
         BidData bidData = bids[msg.sender];
         require(!winner.bid.isNone(), 102);
-        require(winner.pubkey != msg.pubkey(), 102);
-        require(bidData.pubkey == msg.pubkey(), 102);
+        require(bidData.pubkey == msg.pubkey(), 104);
 
         tvm.accept();
-        BidInterface(bidData.bid).transferTo(destination);
+        BidInterface(bidData.bid).transferRemainsTo(destination);
+        // require(false, 322);
     }
 
     function renderHelloWorld() public pure returns (string) {

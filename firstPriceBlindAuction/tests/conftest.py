@@ -3,7 +3,7 @@ import pathlib
 import time
 import logging
 import random
-random.seed(0)
+# random.seed(0)
 
 import tonos_ts4.ts4 as ts4
 
@@ -35,7 +35,7 @@ def root_contract():
             auctionCodeArg=auction_code,
             giverCodeArg=giver_code,
             bidCodeArg=bid_code,
-            rootIdArg=random.randint(0, 1000000)
+            rootIdArg=random.randint(1, 10000)
         ),
         pubkey=generate_pubkey(),
         balance=100000000000,
