@@ -8,7 +8,7 @@ import tonos_ts4.ts4 as ts4
 
 from pytest import fixture
 
-from utils import generate_pubkey, dumb_reciever
+from utils import dumb_reciever
 
 
 LOGGER = logging.getLogger(__name__)
@@ -33,20 +33,26 @@ def root_contract():
             rootIdArg=random.randint(1, 10000)
         ),
         balance=30 * 10 ** 9,
-        nickname = 'Root'
+        keypair=ts4.make_keypair(),
+        # private_key=ROOT_SECRETKEY,
+        # nickname = 'Root',
     )
 
 @fixture(scope='session')
 def auction_contract(root_contract):
     reciever = dumb_reciever()
-    auction_address = root_contract.call_method('startAuctionScenario', dict(
-        prize=100500,
-        bidReciever=reciever.address,
-        startTime=int(time.time()) + 10,
-        biddingDuration=1,
-        revealingDuration=1,
-        publicKey=generate_pubkey(),
-    ))
+    auction_address = root_contract.call_method(
+        'startAuctionScenario',
+        dict(
+            prize=100500,
+            bidReciever=reciever.address,
+            startTime=int(time.time()) + 10,
+            biddingDuration=1,
+            revealingDuration=1,
+            publicKey=ts4.make_keypair()[1],
+        ),
+        private_key=root_contract.private_key_,
+    )
 
     ts4.Address.ensure_address(auction_address)
     ts4.register_nickname(auction_address, 'Auction')

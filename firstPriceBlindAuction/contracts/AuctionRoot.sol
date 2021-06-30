@@ -38,8 +38,8 @@ contract AuctionRoot is RootInterface {
         TvmCell bidCodeArg,
         uint rootIdArg
     ) public {
-        // require(tvm.pubkey() != 0, 101);
-        // require(msg.pubkey() == tvm.pubkey(), 102);
+        require(tvm.pubkey() != 0, 101);
+        require(msg.pubkey() == tvm.pubkey(), 102);
 
         tvm.accept();
 
@@ -57,7 +57,7 @@ contract AuctionRoot is RootInterface {
         uint revealingDuration,
         uint256 publicKey
     ) public returns (address auctionAddress) {
-        // require(msg.pubkey() == tvm.pubkey(), 102);
+        require(msg.pubkey() == tvm.pubkey(), 110);
         require(startTime > tx.timestamp);
         // require(biddingDuration > 0);
         // require(revealingDuration > 0);
@@ -87,7 +87,7 @@ contract AuctionRoot is RootInterface {
     }
 
     function continueAuctionScenario(address auctionAddress) public {
-        // require(tvm.pubkey() == msg.pubkey(), 102);
+        require(tvm.pubkey() == msg.pubkey(), 105);
         require(auctions.exists(auctionAddress), 199);
         AuctionScenarioData auctionScenario = auctions[auctionAddress];
         require(auctionScenario.ended == false, 194);
@@ -103,16 +103,13 @@ contract AuctionRoot is RootInterface {
 
     function setWinner(address winnerBid, address prizeReciever) override external {
         require(auctions.exists(msg.sender), 198);
-        // require(auctionScenario.auctionPubKey == msg.pubkey(), 197);
-        // emit Debug(auctions[msg.sender].ended);
         require(auctions[msg.sender].ended == false, 150);
-        // AuctionScenarioData auctionScenario = auctions[msg.sender];
-        // require(auctionScenario.ended == false, 194);
+
         tvm.accept();
         auctions[msg.sender].winnerBid = winnerBid;
         auctions[msg.sender].prizeReciever = prizeReciever;
 
-        // transfer money <-> goods
+        // transfer money <-> prize
         AuctionScenarioData auction = auctions[msg.sender];
         GiverInterface(auction.giver).transferTo(auction.prizeReciever);
         BidInterface(auction.winnerBid).transferBidTo(auction.bidReciever);
@@ -126,8 +123,6 @@ contract AuctionRoot is RootInterface {
         uint revealingDuration,
         uint256 publicKey
     ) private inline returns (address newAuction) {
-        // require...
-
         newAuction = new Auction {
             code: auctionCode,
             value: 10 ton,
@@ -137,7 +132,7 @@ contract AuctionRoot is RootInterface {
                 biddingDuration: biddingDuration,
                 revealingDuration: revealingDuration,
                 bidCode: bidCode,
-                rootPubKey: tvm.pubkey(),
+                root: this,
                 a_id: number_of_auctions
             }
         }();
@@ -150,7 +145,8 @@ contract AuctionRoot is RootInterface {
             value: 10 ton,
             pubkey: tvm.pubkey(),
             varInit: {
-                prize: prize
+                prize: prize,
+                root: this
             }
         }();
     }

@@ -71,7 +71,8 @@ def test_scenario(auction_contract, root_contract, bids, prize, epsilon):
         'continueAuctionScenario',
         dict(
             auctionAddress=auction_contract.address,
-        )
+        ),
+        private_key=root_contract.private_key_,
     )
     ts4.dispatch_messages()
 

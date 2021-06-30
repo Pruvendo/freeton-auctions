@@ -11,6 +11,7 @@ contract Bidder {
     address static public prizeReciever;
 
     constructor(uint256 amountHashArg, address auctionArg, address recieverArg) public {
+        require(tvm.pubkey() != 0, 101);
         amountHash = amountHashArg;
         auction = auctionArg;
         prizeReciever = recieverArg;
