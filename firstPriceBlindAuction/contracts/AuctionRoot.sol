@@ -9,11 +9,15 @@ import "Interfaces.sol";
 
 struct AuctionScenarioData {
     uint256 auctionPubKey;
+
     address giver;
+    address bidReciever;
+    address winnerBid;
+    address prizeReciever;
+
     uint startTime;
     uint biddingDuration;
     uint revealingDuration;
-    address winnerBid;
     bool ended;
 }
 
@@ -47,6 +51,7 @@ contract AuctionRoot is RootInterface {
 
     function startAuctionScenario(
         uint prize, // nope
+        address bidReciever,
         uint startTime,
         uint biddingDuration,
         uint revealingDuration,
@@ -65,16 +70,18 @@ contract AuctionRoot is RootInterface {
             publicKey
         );
         address giverAddress = deployGiver(prize);
-        address winnerBid;
-        AuctionScenarioData auctionScenarioData = AuctionScenarioData(
-            publicKey,
-            giverAddress,
-            startTime,
-            biddingDuration,
-            revealingDuration,
-            winnerBid,
-            false
-        );
+        address emptyAddress;
+        AuctionScenarioData auctionScenarioData = AuctionScenarioData({
+            auctionPubKey: publicKey,
+            giver: giverAddress,
+            bidReciever: bidReciever,
+            winnerBid: emptyAddress,
+            prizeReciever: emptyAddress,
+            startTime: startTime,
+            biddingDuration: biddingDuration,
+            revealingDuration: revealingDuration,
+            ended: false
+        });
         auctions[auctionAddress] = auctionScenarioData;
         return auctionAddress;
     }
@@ -94,7 +101,7 @@ contract AuctionRoot is RootInterface {
         AucInterface(auctionAddress).endAuction();
     }
 
-    function setWinner(address winnerBid) override external {
+    function setWinner(address winnerBid, address prizeReciever) override external {
         require(auctions.exists(msg.sender), 198);
         // require(auctionScenario.auctionPubKey == msg.pubkey(), 197);
         // emit Debug(auctions[msg.sender].ended);
@@ -102,10 +109,13 @@ contract AuctionRoot is RootInterface {
         // AuctionScenarioData auctionScenario = auctions[msg.sender];
         // require(auctionScenario.ended == false, 194);
         tvm.accept();
-
         auctions[msg.sender].winnerBid = winnerBid;
+        auctions[msg.sender].prizeReciever = prizeReciever;
 
         // transfer money <-> goods
+        AuctionScenarioData auction = auctions[msg.sender];
+        GiverInterface(auction.giver).transferTo(auction.prizeReciever);
+        BidInterface(auction.winnerBid).transferBidTo(auction.bidReciever);
 
         auctions[msg.sender].ended = true;
     }

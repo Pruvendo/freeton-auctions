@@ -8,10 +8,12 @@ contract Bidder {
 
     uint256 static public amountHash;
     address static public auction;
+    address static public prizeReciever;
 
-    constructor(uint256 amountHashX, address auctionX) public {
-        amountHash = amountHashX;
-        auction = auctionX;
+    constructor(uint256 amountHashArg, address auctionArg, address recieverArg) public {
+        amountHash = amountHashArg;
+        auction = auctionArg;
+        prizeReciever = recieverArg;
         tvm.accept();
 
         // AucInterface(auction).makeBid{
@@ -27,7 +29,7 @@ contract Bidder {
 
         AucInterface(auction).makeBid{
             value: val
-        }(amountHash);
+        }(amountHash, prizeReciever);
     }
 
     function toReveal(uint128 amount) public {

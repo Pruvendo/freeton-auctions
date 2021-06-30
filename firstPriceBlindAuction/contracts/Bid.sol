@@ -8,6 +8,7 @@ contract Bid is BidInterface {
 
     uint256 static public rootPubKey;
     uint static public b_id;
+    address static public prizeReciever;
 
     uint128 public amount;
     bool public frozen;
@@ -30,7 +31,14 @@ contract Bid is BidInterface {
     function transferRemainsTo(address destination) override external {
         // require auctionRoot or auction
         require(!frozen);
-        destination.transfer(address(this).balance - amount - 1 ton, false);
+        destination.transfer(address(this).balance - amount - 2 ton, false);
+    }
+
+    function transferBidTo(address destination) override external {
+        // require
+
+        require(!frozen);
+        destination.transfer(amount, false);
     }
 
     function renderHelloWorld() public pure returns (string) {

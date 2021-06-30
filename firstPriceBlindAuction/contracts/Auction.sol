@@ -7,6 +7,7 @@ import "Interfaces.sol";
 
 struct BidData {
     address bid;
+    address prizeReciever;
     uint128 value;
     uint128 amount;
     uint256 amountHash;
@@ -36,7 +37,10 @@ contract Auction is AucInterface {
     //     tvm.accept();
     // }
 
-    function makeBid(uint256 amountHash) override external returns (address bid) {
+    function makeBid(
+        uint256 amountHash,
+        address prizeReciever
+    ) override external returns (address bid) {
         // require...
         // require(1 == 2, 102);
         tvm.accept();
@@ -47,6 +51,7 @@ contract Auction is AucInterface {
             pubkey: tvm.pubkey(),
             varInit: {
                 rootPubKey: rootPubKey,
+                prizeReciever: prizeReciever,
                 b_id: number_of_bids
             }
         }();
@@ -54,6 +59,7 @@ contract Auction is AucInterface {
 
         bids[msg.sender] = BidData(
             bid,
+            prizeReciever,
             msg.value,
             0,
             amountHash,
@@ -93,7 +99,7 @@ contract Auction is AucInterface {
     function endAuction() override public returns (address) {
         //require...
         
-        RootInterface(msg.sender).setWinner(winner.bid);
+        RootInterface(msg.sender).setWinner(winner.bid, winner.prizeReciever);
     }
 
     function takeBidBack(address destination) override external {
@@ -110,6 +116,4 @@ contract Auction is AucInterface {
     function renderHelloWorld() public pure returns (string) {
         return "Hello World";
     }
-
-    receive() external pure {}
 }
