@@ -11,6 +11,6 @@ tondev sol compile DumbReciever.sol;
 tondev sol compile Giver.sol;
 cd ..
 set +e
-pytest -x tests/;
+python3.9 -m pytest -x tests/;
 rm contracts/*json;
 rm contracts/*tvc;
