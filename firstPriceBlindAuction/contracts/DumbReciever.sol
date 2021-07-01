@@ -5,8 +5,8 @@ pragma AbiHeader expire;
 contract DumbReciever {
     uint static public id;
 
-    constructor(uint idArg) public {
+    constructor(uint id_) public {
         tvm.accept();
-        id = idArg;
+        id = id_;
     }
 }

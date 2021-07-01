@@ -25,10 +25,10 @@ def root_contract():
     return ts4.BaseContract(
         'AuctionRoot',
         dict(
-            auctionCodeArg=auction_code,
-            giverCodeArg=giver_code,
-            bidCodeArg=bid_code,
-            rootIdArg=random.randint(1, 10000)
+            auctionCode_=auction_code,
+            giverCode_=giver_code,
+            bidCode_=bid_code,
+            rootId_=random.randint(1, 10000)
         ),
         balance=10 ** 12,
         keypair=ts4.make_keypair(),

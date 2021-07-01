@@ -8,16 +8,16 @@ contract Bidder {
 
     uint256 static public amountHash;
     address static public auction;
-    address static public prizeReciever;
+    address static public lotReciever;
 
-    constructor(uint256 amountHashArg, address auctionArg, address recieverArg) public {
+    constructor(uint256 amountHash_, address auction_, address reciever_) public {
         require(tvm.pubkey() != 0, 101);
-        amountHash = amountHashArg;
-        auction = auctionArg;
-        prizeReciever = recieverArg;
+        amountHash = amountHash_;
+        auction = auction_;
+        lotReciever = reciever_;
         tvm.accept();
 
-        // AucInterface(auction).makeBid{
+        // IAuction(auction).makeBid{
         //     value: 0 ton,
         //     flag: 128 + 64
         // }(amountHash);
@@ -28,14 +28,14 @@ contract Bidder {
 
         uint128 val = msg.value + address(this).balance - (2 ton);
 
-        AucInterface(auction).makeBid{
+        IAuction(auction).makeBid{
             value: val
-        }(amountHash, prizeReciever);
+        }(amountHash, lotReciever);
     }
 
     function toReveal(uint128 amount) public {
         tvm.accept();
-        AucInterface(auction).revealBid(
+        IAuction(auction).revealBid(
             "0000000000000000000000000000000000000000000000000000000000000000",
             amount
         );
@@ -45,6 +45,6 @@ contract Bidder {
         //require...
 
         tvm.accept();
-        AucInterface(auction).takeBidBack(this);
+        IAuction(auction).takeBidBack(this);
     }
 }

@@ -13,7 +13,7 @@ struct AuctionScenarioData {
     address giver;
     address bidReciever;
     address winnerBid;
-    address prizeReciever;
+    address lotReciever;
 
     uint startTime;
     uint biddingDuration;
@@ -21,7 +21,7 @@ struct AuctionScenarioData {
     bool ended;
 }
 
-contract AuctionRoot is RootInterface {
+contract AuctionRoot is IRoot {
 
     mapping(address => AuctionScenarioData) public auctions;
     uint public number_of_auctions;
@@ -33,20 +33,20 @@ contract AuctionRoot is RootInterface {
     TvmCell static public bidCode;
 
     constructor(
-        TvmCell auctionCodeArg,
-        TvmCell giverCodeArg,
-        TvmCell bidCodeArg,
-        uint rootIdArg
+        TvmCell auctionCode_,
+        TvmCell giverCode_,
+        TvmCell bidCode_,
+        uint rootId_
     ) public {
         require(tvm.pubkey() != 0, 101);
         require(msg.pubkey() == tvm.pubkey(), 102);
 
         tvm.accept();
 
-        auctionCode = auctionCodeArg;
-        giverCode = giverCodeArg;
-        bidCode = bidCodeArg;
-        rootId = rootIdArg;
+        auctionCode = auctionCode_;
+        giverCode = giverCode_;
+        bidCode = bidCode_;
+        rootId = rootId_;
     }
 
     function startAuctionScenario(
@@ -76,7 +76,7 @@ contract AuctionRoot is RootInterface {
             giver: giverAddress,
             bidReciever: bidReciever,
             winnerBid: emptyAddress,
-            prizeReciever: emptyAddress,
+            lotReciever: emptyAddress,
             startTime: startTime,
             biddingDuration: biddingDuration,
             revealingDuration: revealingDuration,
@@ -99,21 +99,21 @@ contract AuctionRoot is RootInterface {
         );
         tvm.accept();
 
-        AucInterface(auctionAddress).endAuction();
+        IAuction(auctionAddress).endAuction();
     }
 
-    function setWinner(address winnerBid, address prizeReciever) override external {
+    function setWinner(address winnerBid, address lotReciever) override external {
         require(auctions.exists(msg.sender), 102);
         require(auctions[msg.sender].ended == false, 101);
 
         tvm.accept();
         auctions[msg.sender].winnerBid = winnerBid;
-        auctions[msg.sender].prizeReciever = prizeReciever;
+        auctions[msg.sender].lotReciever = lotReciever;
 
         // transfer money <-> prize
         AuctionScenarioData auction = auctions[msg.sender];
-        GiverInterface(auction.giver).transferTo(auction.prizeReciever);
-        BidInterface(auction.winnerBid).transferBidTo(auction.bidReciever);
+        IGiver(auction.giver).transferTo(auction.lotReciever);
+        IBid(auction.winnerBid).transferBidTo(auction.bidReciever);
 
         auctions[msg.sender].ended = true;
     }

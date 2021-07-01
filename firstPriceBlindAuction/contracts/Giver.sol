@@ -4,7 +4,7 @@ pragma AbiHeader expire;
 
 import "Interfaces.sol";
 
-contract Giver is GiverInterface {
+contract Giver is IGiver {
     
     uint static public prize;
     uint static public g_id;

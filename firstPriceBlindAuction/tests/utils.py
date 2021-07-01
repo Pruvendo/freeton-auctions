@@ -12,7 +12,7 @@ def dumb_reciever():
     return ts4.BaseContract(
         'DumbReciever',
         dict(
-            idArg=random.randint(0, 100000),
+            id_=random.randint(0, 100000),
         ),
         balance=10**9,
     )
@@ -26,9 +26,9 @@ def make_bid(auction_address, value, owner, expect_ec=0, amount_hash='0'):
     bidder = ts4.BaseContract(
         'Bidder',
         dict(
-            amountHashArg=amount_hash,
-            auctionArg=auction_address,
-            recieverArg=reciever.address,
+            amountHash_=amount_hash,
+            auction_=auction_address,
+            reciever_=reciever.address,
         ),
         keypair=keypair,
         balance=value,

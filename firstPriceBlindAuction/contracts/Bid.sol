@@ -4,11 +4,11 @@ pragma AbiHeader expire;
 
 import "Interfaces.sol";
 
-contract Bid is BidInterface {
+contract Bid is IBid {
 
     // uint256 static public rootPubKey;
     uint static public b_id;
-    address static public prizeReciever;
+    address static public lotReciever;
     address static public root;
     address static public auction;
 
@@ -25,10 +25,10 @@ contract Bid is BidInterface {
         frozen = true;
     }
 
-    function unfreeze(uint128 amountArg) override external {
+    function unfreeze(uint128 amount_) override external {
         require(msg.sender == root || msg.sender == auction, 102);
 
-        amount = amountArg;
+        amount = amount_;
         frozen = false;
     }
 
