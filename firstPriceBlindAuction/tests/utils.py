@@ -1,4 +1,3 @@
-# pyright: reportMissingImports=false
 import time
 import logging
 import string

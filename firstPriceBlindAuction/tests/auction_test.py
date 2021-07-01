@@ -1,4 +1,3 @@
-# pyright: reportMissingImports=false
 import tonos_ts4.ts4 as ts4
 
 import logging

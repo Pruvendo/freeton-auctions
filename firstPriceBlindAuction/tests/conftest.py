@@ -1,4 +1,3 @@
-# pyright: reportMissingImports=false
 import pathlib
 import time
 import logging
@@ -32,15 +31,16 @@ def root_contract():
             bidCodeArg=bid_code,
             rootIdArg=random.randint(1, 10000)
         ),
-        balance=30 * 10 ** 9,
+        balance=10 ** 12,
         keypair=ts4.make_keypair(),
         # private_key=ROOT_SECRETKEY,
         # nickname = 'Root',
     )
 
-@fixture(scope='session')
+@fixture(scope='function')
 def auction_contract(root_contract):
     reciever = dumb_reciever()
+    ts4.dispatch_messages()
     auction_address = root_contract.call_method(
         'startAuctionScenario',
         dict(
@@ -55,7 +55,7 @@ def auction_contract(root_contract):
     )
 
     ts4.Address.ensure_address(auction_address)
-    ts4.register_nickname(auction_address, 'Auction')
+    # ts4.register_nickname(auction_address, 'Auction')
     ts4.dispatch_messages()
     res = ts4.BaseContract(
         'Auction',
