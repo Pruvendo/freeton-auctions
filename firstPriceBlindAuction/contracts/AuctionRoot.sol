@@ -63,13 +63,29 @@ contract AuctionRoot is IRoot {
         require(revealingDuration > 0, 103);
         tvm.accept();
 
-        auctionAddress = deployAuction(
-            startTime,
-            biddingDuration,
-            revealingDuration,
-            publicKey
-        );
-        address giverAddress = deployGiver(prize);
+        auctionAddress = new Auction {
+            code: auctionCode,
+            value: 10 ton,
+            pubkey: publicKey,
+            varInit: {
+                startTime: startTime,
+                biddingDuration: biddingDuration,
+                revealingDuration: revealingDuration,
+                bidCode: bidCode,
+                root: this,
+                a_id: number_of_auctions
+            }
+        }();
+        address giverAddress = new Giver {
+            code: giverCode,
+            value: 10 ton,
+            pubkey: tvm.pubkey(),
+            varInit: {
+                prize: prize,
+                root: this,
+                g_id: number_of_auctions
+            }
+        }();
         address emptyAddress;
         AuctionScenarioData auctionScenarioData = AuctionScenarioData({
             auctionPubKey: publicKey,
@@ -116,39 +132,5 @@ contract AuctionRoot is IRoot {
         IBid(auction.winnerBid).transferBidTo(auction.bidReciever);
 
         auctions[msg.sender].ended = true;
-    }
-
-    function deployAuction(
-        uint startTime,
-        uint biddingDuration,
-        uint revealingDuration,
-        uint256 publicKey
-    ) private inline returns (address newAuction) {
-        newAuction = new Auction {
-            code: auctionCode,
-            value: 10 ton,
-            pubkey: publicKey,
-            varInit: {
-                startTime: startTime,
-                biddingDuration: biddingDuration,
-                revealingDuration: revealingDuration,
-                bidCode: bidCode,
-                root: this,
-                a_id: number_of_auctions
-            }
-        }();
-    }
-
-    function deployGiver(uint prize) private inline returns (address newGiver) {
-        newGiver = new Giver {
-            code: giverCode,
-            value: 10 ton,
-            pubkey: tvm.pubkey(),
-            varInit: {
-                prize: prize,
-                root: this,
-                g_id: number_of_auctions
-            }
-        }();
     }
 }
