@@ -57,10 +57,10 @@ contract AuctionRoot is RootInterface {
         uint revealingDuration,
         uint256 publicKey
     ) public returns (address auctionAddress) {
-        require(msg.pubkey() == tvm.pubkey(), 110);
-        require(startTime > tx.timestamp);
-        // require(biddingDuration > 0);
-        // require(revealingDuration > 0);
+        require(msg.pubkey() == tvm.pubkey(), 102);
+        require(startTime > now, 103);
+        require(biddingDuration > 0, 103);
+        require(revealingDuration > 0, 103);
         tvm.accept();
 
         auctionAddress = deployAuction(
@@ -83,27 +83,28 @@ contract AuctionRoot is RootInterface {
             ended: false
         });
         auctions[auctionAddress] = auctionScenarioData;
+        number_of_auctions += 1;
         return auctionAddress;
     }
 
     function continueAuctionScenario(address auctionAddress) public {
-        require(tvm.pubkey() == msg.pubkey(), 105);
-        require(auctions.exists(auctionAddress), 199);
+        require(tvm.pubkey() == msg.pubkey(), 102);
+        require(auctions.exists(auctionAddress), 101);
         AuctionScenarioData auctionScenario = auctions[auctionAddress];
-        require(auctionScenario.ended == false, 194);
-        // require(
-        //     tx.timestamp > (auctionScenario.startTime
-        //         + auctionScenario.biddingDuration
-        //         + auctionScenario.revealingDuration)
-        // );
+        require(auctionScenario.ended == false, 101);
+        require(
+            now > (auctionScenario.startTime
+                + auctionScenario.biddingDuration
+                + auctionScenario.revealingDuration), 103
+        );
         tvm.accept();
 
         AucInterface(auctionAddress).endAuction();
     }
 
     function setWinner(address winnerBid, address prizeReciever) override external {
-        require(auctions.exists(msg.sender), 198);
-        require(auctions[msg.sender].ended == false, 150);
+        require(auctions.exists(msg.sender), 102);
+        require(auctions[msg.sender].ended == false, 101);
 
         tvm.accept();
         auctions[msg.sender].winnerBid = winnerBid;
@@ -136,7 +137,6 @@ contract AuctionRoot is RootInterface {
                 a_id: number_of_auctions
             }
         }();
-        number_of_auctions += 1;
     }
 
     function deployGiver(uint prize) private inline returns (address newGiver) {
@@ -146,13 +146,9 @@ contract AuctionRoot is RootInterface {
             pubkey: tvm.pubkey(),
             varInit: {
                 prize: prize,
-                root: this
+                root: this,
+                g_id: number_of_auctions
             }
         }();
-    }
-
-    function renderHelloWorld() public pure returns (string) {
-        require(msg.value == 0 ton, 200);
-        return "Hello World";
     }
 }

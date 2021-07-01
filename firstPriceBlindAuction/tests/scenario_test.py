@@ -1,17 +1,16 @@
 import tonos_ts4.ts4 as ts4
 
 import logging
-
 import pytest
-
-from time import sleep
+import time
 
 from utils import (
     make_bid,
     reveal_bid,
     take_bid_back,
     balance,
-    prize_balance
+    prize_balance,
+    make_auction_contract,
 )
 
 
@@ -21,7 +20,8 @@ LOGGER = logging.getLogger(__name__)
 
 
 @pytest.mark.parametrize(
-    "bids, prize, epsilon",
+    '''bids, prize, epsilon, start_time,
+        bidding_duration, revealing_duration''',
     [
         (
             [
@@ -40,13 +40,31 @@ LOGGER = logging.getLogger(__name__)
                     'expected_final_balance': 10**11 - 2*10**10,
                 },
             ],
-            10 * 10 ** 9,
-            2 * 10 ** 9,
+            10*10**9,
+            2*10**9,
+            int(time.time()) + 1000,
+            10,
+            10,
         ),
     ]
 )
-@pytest.mark.order(3)
-def test_scenario(auction_contract, root_contract, bids, prize, epsilon):
+def test_scenario(
+    root_contract,
+    bids,
+    prize,
+    epsilon,
+    start_time,
+    bidding_duration,
+    revealing_duration
+):
+    auction_contract = make_auction_contract(
+        root_contract=root_contract,
+        start_time=start_time,
+        bidding_duration=bidding_duration,
+        revealing_duration=revealing_duration,
+    )
+    ts4.core.set_now(start_time + bidding_duration // 2)
+
     for bid in bids:
         make_bid(
             auction_address=auction_contract.address,
@@ -56,12 +74,16 @@ def test_scenario(auction_contract, root_contract, bids, prize, epsilon):
 
     assert len(bids) == auction_contract.call_getter('number_of_bids')
 
+    ts4.core.set_now(start_time + bidding_duration + revealing_duration // 2)
+
     for bid in bids:
         reveal_bid(
             bid['amount'],
             bid['owner'],
         )
-    
+
+    ts4.core.set_now(start_time + bidding_duration + revealing_duration + 1)
+
     for bid in bids:
         take_bid_back(bid['owner'])
 
@@ -76,11 +98,13 @@ def test_scenario(auction_contract, root_contract, bids, prize, epsilon):
     ts4.dispatch_messages()
 
     for bid in bids:
-        assert abs(balance(bid['owner']) - bid['expected_final_balance']) <= epsilon
-    
+        assert abs(balance(bid['owner']) -
+                   bid['expected_final_balance']) <= epsilon
+
     for bid in bids:
         if bid['winner']:
-            assert abs(auction_contract.bid_reciever.balance - bid['amount']) <= epsilon
+            assert abs(auction_contract.bid_reciever.balance -
+                       bid['amount']) <= epsilon
             assert abs(prize_balance(bid['owner']) - prize) <= epsilon
         else:
             assert prize_balance(bid['owner']) <= epsilon

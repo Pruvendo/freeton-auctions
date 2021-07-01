@@ -44,8 +44,4 @@ contract Bid is BidInterface {
         require(!frozen);
         destination.transfer(amount, false);
     }
-
-    function renderHelloWorld() public pure returns (string) {
-        return "Hello World";
-    }
 }

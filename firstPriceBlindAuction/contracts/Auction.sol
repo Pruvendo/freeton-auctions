@@ -22,7 +22,6 @@ contract Auction is AucInterface {
     uint static public biddingDuration;
     uint static public revealingDuration;
     TvmCell static public bidCode;
-    // uint256 static public rootPubKey;
     address static public root;
 
     mapping(address => BidData) public bids;
@@ -31,8 +30,6 @@ contract Auction is AucInterface {
     constructor() public {
         require(tvm.pubkey() != 0, 101);
         require(msg.sender == root, 102);
-
-        tvm.accept();
     }
 
     function makeBid(
@@ -40,6 +37,10 @@ contract Auction is AucInterface {
         address prizeReciever
     ) override external returns (address bid) {
         require(msg.value >= 3 ton, 103);
+        require(
+            now < (startTime + biddingDuration) && now >= startTime,
+            103
+        );
         tvm.accept();
 
         bid = new Bid{
@@ -66,9 +67,13 @@ contract Auction is AucInterface {
     }
 
     function revealBid(bytes signature, uint128 amount) override external {
-        require(signature.length == 64, 200);
-        require(bids.exists(msg.sender), 103);
-        BidData bidData = bids[msg.sender];
+        require(signature.length == 64, 103);
+        require(bids.exists(msg.sender), 102);
+        require(
+            (now < (startTime + biddingDuration + revealingDuration))
+                && (now >= (startTime + biddingDuration)),
+            103
+        );
         // require(bidData.pubkey == msg.pubkey(), 104);
         // require(tvm.checkSign(
         //         bidData.amountHash,
@@ -78,39 +83,36 @@ contract Auction is AucInterface {
 
         // TODO: require hash value is correct
 
-        bidData.amount = amount;
-        bidData.amountSecret = signature;
+        bids[msg.sender].amount = amount;
+        bids[msg.sender].amountSecret = signature;
 
         if (winner.bid.isNone()) {
-            BidInterface(bidData.bid).unfreeze(amount);
-            winner = bidData;
+            BidInterface(bids[msg.sender].bid).unfreeze(amount);
+            winner = bids[msg.sender];
         } else {
-            if (winner.amount < bidData.amount) {
+            if (winner.amount < bids[msg.sender].amount) {
                 BidInterface(winner.bid).unfreeze(0);
-                BidInterface(bidData.bid).unfreeze(amount);
-                winner = bidData;
+                BidInterface(bids[msg.sender].bid).unfreeze(amount);
+                winner = bids[msg.sender];
             }
         }
     }
 
     function endAuction() override public returns (address) {
         require(msg.sender == root, 102);
+        require(now >= (startTime + biddingDuration + revealingDuration), 103);
         
         RootInterface(msg.sender).setWinner(winner.bid, winner.prizeReciever);
     }
 
     function takeBidBack(address destination) override external {
-        require(bids.exists(msg.sender), 101);
+        require(bids.exists(msg.sender), 102);
         BidData bidData = bids[msg.sender];
-        require(!winner.bid.isNone(), 102);
-        // require(bidData.pubkey == msg.pubkey(), 104);
+        require(!winner.bid.isNone(), 101);
+        require(!bidData.amountSecret.empty(), 101);
+        require(now >= (startTime + biddingDuration + revealingDuration), 103);
 
         tvm.accept();
         BidInterface(bidData.bid).transferRemainsTo(destination);
-        // require(false, 322);
-    }
-
-    function renderHelloWorld() public pure returns (string) {
-        return "Hello World";
     }
 }

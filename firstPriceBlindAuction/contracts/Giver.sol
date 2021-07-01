@@ -7,6 +7,7 @@ import "Interfaces.sol";
 contract Giver is GiverInterface {
     
     uint static public prize;
+    uint static public g_id;
     address static public root;
 
     constructor() public {
