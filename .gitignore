@@ -1,5 +1,3 @@
-*.abi.json
-*.tvc
 *__pycache__*
 *.py[cod]
 *$py.class

@@ -133,4 +133,8 @@ contract AuctionRoot is IRoot {
 
         auctions[msg.sender].ended = true;
     }
+
+    function getInfo() public pure returns (string) {
+        return "Hello, motherhacker!";
+    }
 }
