@@ -1,6 +1,8 @@
 /* solhint-disable */
 pragma ton-solidity >= 0.35.0;
 pragma AbiHeader expire;
+// pragma AbiHeader time;
+pragma AbiHeader pubkey;
 
 import "Auction.sol";
 import "Bid.sol";
@@ -134,7 +136,7 @@ contract AuctionRoot is IRoot {
         auctions[msg.sender].ended = true;
     }
 
-    function getInfo() public pure returns (string) {
-        return "Hello, motherhacker!";
+    function getInfo() public view returns (string) {
+        return format("Hello, motherhacker! tvm.pubkey() is {}", tvm.pubkey());
     }
 }

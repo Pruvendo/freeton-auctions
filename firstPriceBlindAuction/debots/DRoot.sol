@@ -3,10 +3,13 @@ pragma ton-solidity >=0.35.0;
 pragma AbiHeader expire;
 pragma AbiHeader time;
 pragma AbiHeader pubkey;
+
 // import required DeBot interfaces and basic DeBot contract.
 import "../libs/Debot.sol";
 import "../libs/Menu.sol";
 import "../libs/Terminal.sol";
+import "../libs/AddressInput.sol";
+import "../libs/AmountInput.sol";
 
 interface IAuctionRoot {
     function startAuctionScenario(
@@ -22,64 +25,72 @@ interface IAuctionRoot {
 }
 
 contract HelloDebot is Debot {
+
+    /*---------------------------------------------------------------------\
+    |                                                                      |
+    |                                DATA                                  |
+    |                                                                      |
+    \---------------------------------------------------------------------*/
+
     bytes m_icon;
-    address rootContract;
+    address root;
+    address[] auctions;
+    uint256 publicKey;
 
-    function setIcon(bytes icon) public {
-        require(msg.pubkey() == tvm.pubkey(), 100);
-        tvm.accept();
-        m_icon = icon;
-    }
+    bool __got_x;
+    uint128 __x;
 
-    /// @notice Entry point function for DeBot.
+    /*---------------------------------------------------------------------\
+    |                                                                      |
+    |                              METHODS                                 |
+    |                                                                      |
+    \---------------------------------------------------------------------*/
+
     function start() public override {
-        // print string to user.
-        Terminal.print(0, "Hello, World!");
-        // input string from user and define callback that receives entered string.
-        // Terminal.input(tvm.functionId(setUserInput), "How is it going?", false);
+        __got_x = false;
+        Terminal.input(tvm.functionId(savePublicKey), "Enter your public key:", false);
+        AddressInput.get(tvm.functionId(saveRootAddress),"Enter root contract's address:");
         _menu();
     }
 
-    /// @notice Returns Metadata about DeBot.
-    function getDebotInfo() public functionID(0xDEB) override view returns(
-        string name, string version, string publisher, string caption, string author,
-        address support, string hello, string language, string dabi, bytes icon
-    ) {
-        name = "HelloWorld";
-        version = "0.2.0";
-        publisher = "TON Labs";
-        caption = "Start develop DeBot from here";
-        author = "TON Labs";
-        support = address.makeAddrStd(0, 0x841288ed3b55d9cdafa806807f02a0ae0c169aa5edfe88a789a6482429756a94);
-        hello = "Hello, i am a HelloWorld DeBot.";
-        language = "en";
-        dabi = m_debotAbi.get();
-        icon = m_icon;
-    }
-
-    function getRequiredInterfaces() public view override returns (uint256[] interfaces) {
-        return [ Terminal.ID, Menu.ID ];
-    }
-
-    // function setUserInput(string value) public {
-    //     // TODO: continue DeBot logic here...
-    //     Terminal.print(0, format("You have entered \"{}\"", value));
-    // }
     function _menu() private {
         string sep = '----------------------------------------';
         Menu.select(
-            "AuctionRootDebot menu",
+            sep + "\nAuctionRootDebot menu",
             sep,
             [
                 MenuItem("startAuctionScenario", "",tvm.functionId(startAuctionScenario)),
                 MenuItem("continueAuctionScenario", "",tvm.functionId(continueAuctionScenario)),
-                MenuItem("getAuctionInfo", "",tvm.functionId(getAuctionInfo))
+                MenuItem("getRootInfo", "",tvm.functionId(getRootInfo)),
+                MenuItem("test", "",tvm.functionId(test))
             ]
         );
     }
 
     function startAuctionScenario(uint32 index) public {
-        Terminal.print(0, "Hack you!1");
+        address n;
+        IAuctionRoot(root).startAuctionScenario{
+            abiVer: 2,
+            extMsg: true,
+            sign: true,
+            pubkey: publicKey,
+            time: uint64(now),
+            expire: now + 100,
+            callbackId: tvm.functionId(startAuctionScenario_),
+            onErrorId: tvm.functionId(onError)
+        }(
+            100500,
+            n,
+            now + 1000,
+            10,
+            10,
+            publicKey
+        );
+    }
+
+    function startAuctionScenario_(address auction_) public {
+        Terminal.print(0, format("\nNew auction's address: {}", auction_));
+        auctions.push(auction_);
         _menu();
     }
 
@@ -88,8 +99,89 @@ contract HelloDebot is Debot {
         _menu();
     }
 
-    function getAuctionInfo(uint32 index) public {
-        Terminal.print(0, "Hack you!3");
+    function continueAuctionScenario_(uint32 index) public {
+        Terminal.print(0, "Hack you!2");
+        _menu();
+    }
+
+    function getRootInfo(uint32 index) public {
+        optional(uint256) none;
+        IAuctionRoot(root).getInfo{
+            abiVer: 2,
+            extMsg: true,
+            sign: false,
+            pubkey: none,
+            time: uint64(now),
+            expire: now + 100,
+            callbackId: tvm.functionId(getRootInfo_),
+            onErrorId: tvm.functionId(onError)
+        }();
+    }
+
+    function getRootInfo_(string info) public {
+        Terminal.print(0, info);
+        _menu();
+    }
+
+    function test(uint32 index) public {
+        Terminal.print(0, format("Hello World!"));
+        _menu();
+    }
+
+    /*---------------------------------------------------------------------\
+    |                                                                      |
+    |                        READING CHAINS                                |
+    |                                                                      |
+    \---------------------------------------------------------------------*/
+
+    function savePublicKey(string value) public {
+        (uint res, bool status) = stoi("0x"+value);
+        if (status) {
+            publicKey = res;
+        } else {
+            Terminal.input(
+                tvm.functionId(savePublicKey),
+                "Wrong public key. Try again!\nPlease enter your public key",
+                false
+            );
+        }
+    }
+
+    function saveRootAddress(address value) public {
+        root = value;
+    }
+
+    /*---------------------------------------------------------------------\
+    |                                                                      |
+    |                            TECHNICAL                                 |
+    |                                                                      |
+    \---------------------------------------------------------------------*/
+
+    function setIcon(bytes icon) public {
+        require(msg.pubkey() == tvm.pubkey(), 100);
+        tvm.accept();
+        m_icon = icon;
+    }
+
+    function getDebotInfo() public functionID(0xDEB) override view returns(
+        string name, string version, string publisher, string caption, string author,
+        address support, string hello, string language, string dabi, bytes icon
+    ) {
+        name = "AuctionRootDebot";
+        version = "0.0.1";
+        publisher = "Pruvendo";
+        caption = "Start develop DeBot from here";
+        author = "Pruvendo";
+        language = "en";
+        dabi = m_debotAbi.get();
+    }
+
+    function getRequiredInterfaces() public view override returns (uint256[] interfaces) {
+        return [ Terminal.ID, Menu.ID ];
+    }
+
+    function onError(uint32 sdkError, uint32 exitCode) public {
+        Terminal.print(0, format("Oooops!\nsdkError: {}, exitCode: {}", sdkError, exitCode));
         _menu();
     }
 }
