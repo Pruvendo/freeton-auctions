@@ -21,7 +21,6 @@ interface IGiver {
     function transferTo(address destination) external;
 }
 
-interface IBid is IGiver{
+interface IBid is IGiver {
     function transferRemainsTo(address destination) external;
-    // function transferTo(address destination) external;
 }
