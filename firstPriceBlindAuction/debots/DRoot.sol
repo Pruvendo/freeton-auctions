@@ -10,23 +10,7 @@ import "../libs/Menu.sol";
 import "../libs/Terminal.sol";
 import "../libs/AddressInput.sol";
 import "../libs/AmountInput.sol";
-
-interface IAuctionRoot {
-    function startAuctionScenario(
-        address lotGiver,
-        address bidReciever,
-        uint startTime,
-        uint biddingDuration,
-        uint revealingDuration,
-        uint transferDuration
-    ) external returns (address auctionAddress);
-    function continueAuctionScenario(address auctionAddress) external;
-    function getInfo() external returns (string);
-}
-
-interface IAuction {
-    function end() external;
-}
+import "../contracts/Interfaces.sol";
 
 struct AuctionScenarioData {
     address lotGiver;
@@ -71,7 +55,6 @@ contract HelloDebot is Debot {
             [
                 MenuItem("startAuctionScenario", "",tvm.functionId(startAuctionScenario)),
                 MenuItem("endAuction", "",tvm.functionId(endAuction)),
-                MenuItem("getRootInfo", "",tvm.functionId(getRootInfo)),
                 MenuItem("test", "",tvm.functionId(test))
             ]
         );
@@ -114,25 +97,6 @@ contract HelloDebot is Debot {
 
     function endAuction_(address value) public {
         IAuction(value).end();
-        _menu();
-    }
-
-    function getRootInfo(uint32 index) public {
-        optional(uint256) none;
-        IAuctionRoot(root).getInfo{
-            abiVer: 2,
-            extMsg: true,
-            sign: false,
-            pubkey: none,
-            time: uint64(now),
-            expire: now + 100,
-            callbackId: tvm.functionId(getRootInfo_),
-            onErrorId: tvm.functionId(onError)
-        }();
-    }
-
-    function getRootInfo_(string info) public {
-        Terminal.print(0, info);
         _menu();
     }
 
@@ -215,7 +179,7 @@ contract HelloDebot is Debot {
 
     function __saveTransferDuration(uint256 value) public {
         __transferDuration = uint(value);
-        IAuctionRoot(root).startAuctionScenario{
+        IRoot(root).startAuctionScenario{
             abiVer: 2,
             extMsg: true,
             sign: true,

@@ -53,7 +53,7 @@ contract AuctionRoot is IRoot {
         uint biddingDuration,
         uint revealingDuration,
         uint transferDuration
-    ) public returns (address auctionAddress) {
+    ) override external returns (address auctionAddress) {
         require(msg.pubkey() == tvm.pubkey(), 102);
         require(startTime > now, 103);
         require(biddingDuration > 0, 103);
@@ -98,10 +98,6 @@ contract AuctionRoot is IRoot {
         // transfer money <-> prize
         IGiver(bidGiver).transferTo(bidReciever);
         IGiver(lotGiver).transferTo(lotReciever);
-    }
-
-    function getInfo() public view returns (string) {
-        return format("Hello, motherhacker! tvm.pubkey() is {}", tvm.pubkey());
     }
 
     function addressFitsCode(

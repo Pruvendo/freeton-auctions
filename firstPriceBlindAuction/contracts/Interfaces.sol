@@ -15,6 +15,15 @@ interface IRoot {
         address lotReciever,
         TvmCell data
     ) external;
+
+    function startAuctionScenario(
+        address lotGiver,
+        address bidReciever,
+        uint startTime,
+        uint biddingDuration,
+        uint revealingDuration,
+        uint transferDuration
+    ) external returns (address auctionAddress);
 }
 
 interface IGiver {
