@@ -26,7 +26,7 @@ struct AuctionScenarioData {
     bool ended;
 }
 
-contract HelloDebot is Debot {
+contract AuctionRootDebot is Debot {
 
     /*---------------------------------------------------------------------\
     |                                                                      |
@@ -44,11 +44,14 @@ contract HelloDebot is Debot {
     |                                                                      |
     \---------------------------------------------------------------------*/
 
+    function start() public override {
+        Terminal.inputStr(tvm.functionId(savePublicKey), "Enter your public key:", false);
+        AddressInput.get(tvm.functionId(saveRootAddress),"Enter root contract's address:");
+        _menu();
+    }
+
     function _menu() private {
-        uint64 x = uint64(1 << 64);
-        // Terminal.print(0, format("{}", x));
-        // string sep = '----------------------------------------';
-        string sep = format("{}", x);
+        string sep = '----------------------------------------';
         Menu.select(
             sep + "\nAuctionRootDebot menu",
             sep,
@@ -219,7 +222,7 @@ contract HelloDebot is Debot {
         name = "AuctionRootDebot";
         version = "0.0.1";
         publisher = "Pruvendo";
-        caption = "Start develop DeBot from here";
+        caption = "lorem ipsum";
         author = "Pruvendo";
         language = "en";
         dabi = m_debotAbi.get();
@@ -231,12 +234,6 @@ contract HelloDebot is Debot {
 
     function onError(uint32 sdkError, uint32 exitCode) public {
         Terminal.print(0, format("Oooops!\nsdkError: {}, exitCode: {}", sdkError, exitCode));
-        _menu();
-    }
-
-    function start() public override {
-        Terminal.inputStr(tvm.functionId(savePublicKey), "Enter your public key:", false);
-        AddressInput.get(tvm.functionId(saveRootAddress),"Enter root contract's address:");
         _menu();
     }
 }
