@@ -84,8 +84,8 @@ tonos-cli --url $NETWORK \
     --abi contracts/AuctionRoot.abi.json \
     "{
         \"auctionCode_\": \"$auc_code\",
-        \"giverCode_\": \"$giver_code\",
-        \"bidCode_\": \"$bid_code\"
+        \"lotGiverCode_\": \"$giver_code\",
+        \"bidGiverCode_\": \"$bid_code\"
     }";
 
 
