@@ -88,13 +88,15 @@ def test_scenario(
         take_bid_back(bid['owner'])
 
     ts4.dispatch_messages()
-    root_contract.call_method(
-        'continueAuctionScenario',
-        dict(
-            auctionAddress=auction_contract.address,
-        ),
-        private_key=root_contract.private_key_,
-    )
+    # root_contract.call_method(
+    #     'continueAuctionScenario',
+    #     dict(
+    #         auctionAddress=auction_contract.address,
+    #     ),
+    #     private_key=root_contract.private_key_,
+    # )
+    assert auction_contract.bid_reciever.balance <= epsilon
+    auction_contract.call_method('end')
     ts4.dispatch_messages()
 
     for bid in bids:

@@ -2,111 +2,131 @@
 pragma ton-solidity >= 0.35.0;
 pragma AbiHeader expire;
 
-import "Bid.sol";
 import "Interfaces.sol";
 
 struct BidData {
-    address bid;
+    address bidGiver;
     address lotReciever;
-    uint128 value;
     uint128 amount;
-    uint256 amountHash;
-    bytes secret;
 }
 
 contract Auction is IAuction {
 
-    uint public number_of_bids;
+    /*---------------------------------------------------------------------\
+    |                                                                      |
+    |                                STATE                                 |
+    |                                                                      |
+    \---------------------------------------------------------------------*/
+
     uint static public a_id;
+
     uint static public startTime;
     uint static public biddingDuration;
     uint static public revealingDuration;
-    TvmCell static public bidCode;
+    uint static public transferDuration;
+
+    address static public lotGiver;
+    address static public bidReciever;
+
+    TvmCell static public bidGiverCode;
     address static public root;
 
-    mapping(address => BidData) public bids;
+    /*---------------------------------------------------------------------\
+    |                                                                      |
+    |                                DATA                                  |
+    |                                                                      |
+    \---------------------------------------------------------------------*/
+
+    // mapping(address => BidData) public bids;
+    uint public number_of_bids;
     BidData public winner;
+    bool public ended;
+
+    /*---------------------------------------------------------------------\
+    |                                                                      |
+    |                               METHODS                                |
+    |                                                                      |
+    \---------------------------------------------------------------------*/
 
     constructor() public {
         require(tvm.pubkey() != 0, 101);
         require(msg.sender == root, 102);
+        ended = false;
     }
 
-    function makeBid(
-        uint256 amountHash,
-        address lotReciever
-    ) override external returns (address bid) {
-        require(msg.value >= 3 ton, 103);
-        require(
-            now < (startTime + biddingDuration) && now >= startTime,
-            103
-        );
-        tvm.accept();
+    function revealBid(
+        uint256 secret,
+        uint128 amount,
+        TvmCell data
+    ) override external {
+        require(addressFitsCode(msg.sender, bidGiverCode, data), 102);
 
-        bid = new Bid{
-            code: bidCode,
-            value: msg.value,
-            pubkey: tvm.pubkey(),
-            varInit: {
-                root: root,
-                auction: this,
-                lotReciever: lotReciever,
-                b_id: number_of_bids
-            }
-        }();
-        number_of_bids = number_of_bids + 1;
+        (
+            uint __startTime,
+            uint __biddingDuration,
+            uint __revealingDuration,
+            uint __transferDuration,
 
-        bids[msg.sender] = BidData(
-            bid,
-            lotReciever,
-            msg.value,
-            0,
-            amountHash,
-            ""
-        );
-    }
+            address __root,
+            address __auction,
+            address __lotReciever,
 
-    function revealBid(bytes signature, uint128 amount) override external {
-        require(signature.length == 64, 103);
-        require(bids.exists(msg.sender), 102);
-        require(
-            (now < (startTime + biddingDuration + revealingDuration))
-                && (now >= (startTime + biddingDuration)),
-            103
+            uint256 __amountHash
+        ) = data.toSlice().decode(
+            uint, uint, uint, uint, address, address, address, uint256
         );
 
         // require(tvm.checkSign(?????), 201);
-
-        bids[msg.sender].amount = amount;
-        bids[msg.sender].secret = signature;
-
-        if (winner.bid.isNone()) {
-            IBid(bids[msg.sender].bid).unfreeze(amount);
-            winner = bids[msg.sender];
-        } else {
-            if (winner.amount < bids[msg.sender].amount) {
-                IBid(winner.bid).unfreeze(0);
-                IBid(bids[msg.sender].bid).unfreeze(amount);
-                winner = bids[msg.sender];
-            }
+    
+        if (winner.bidGiver.isNone() || winner.amount < amount) {
+            winner = BidData({
+                bidGiver: msg.sender,
+                lotReciever: __lotReciever, //TODO: data???
+                amount: amount
+            });
         }
     }
 
-    function endAuction() override public {
-        require(msg.sender == root, 102);
+    function end() override public {
+        require(!ended, 102);
         require(now >= (startTime + biddingDuration + revealingDuration), 103);
+        tvm.accept();
         
-        IRoot(msg.sender).setWinner(winner.bid, winner.lotReciever);
+        ended = true;
+
+        TvmBuilder builder;
+        builder.store(
+            a_id,
+            startTime,
+            biddingDuration,
+            revealingDuration,
+            transferDuration,
+            lotGiver,
+            bidReciever,
+            bidGiverCode,
+            root
+        );
+        TvmCell data = builder.toCell();
+        
+        IRoot(root).setWinner({
+            bidGiver: winner.bidGiver,
+            lotGiver: lotGiver,
+            bidReciever: bidReciever,
+            lotReciever: winner.lotReciever,
+            data: data
+        });
     }
 
-    function takeBidBack(address destination) override external {
-        require(bids.exists(msg.sender), 102);
-        BidData bidData = bids[msg.sender];
-        require(!winner.bid.isNone(), 101);
-        require(!bidData.secret.empty(), 101);
-        require(now >= (startTime + biddingDuration + revealingDuration), 103);
+    function addressFitsCode(
+        address sender,
+        TvmCell code,
+        TvmCell data
+    ) private returns (bool) {
 
-        tvm.accept();
-        IBid(bidData.bid).transferRemainsTo(destination);
+        TvmCell stateInit = tvm.buildStateInit(code, data);
+        TvmCell stateInitWithKey = tvm.insertPubkey(stateInit, tvm.pubkey());
+    
+        address addr = address(tvm.hash(stateInitWithKey));
+        return addr == sender;
     }
 }

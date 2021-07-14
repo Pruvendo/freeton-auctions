@@ -28,7 +28,6 @@ def root_contract():
             auctionCode_=auction_code,
             giverCode_=giver_code,
             bidCode_=bid_code,
-            rootId_=random.randint(1, 10000)
         ),
         balance=10 ** 12,
         keypair=ts4.make_keypair(),

@@ -13,15 +13,33 @@ import "../libs/AmountInput.sol";
 
 interface IAuctionRoot {
     function startAuctionScenario(
-        uint prize, // nope
+        address lotGiver,
         address bidReciever,
         uint startTime,
         uint biddingDuration,
         uint revealingDuration,
-        uint256 publicKey
+        uint transferDuration
     ) external returns (address auctionAddress);
     function continueAuctionScenario(address auctionAddress) external;
     function getInfo() external returns (string);
+}
+
+interface IAuction {
+    function end() external;
+}
+
+struct AuctionScenarioData {
+    address lotGiver;
+    address bidGiver;
+    address lotReciever;
+    address bidReciever;
+
+    uint startTime;
+    uint biddingDuration;
+    uint revealingDuration;
+    uint transferDuration;
+
+    bool ended;
 }
 
 contract HelloDebot is Debot {
@@ -32,35 +50,27 @@ contract HelloDebot is Debot {
     |                                                                      |
     \---------------------------------------------------------------------*/
 
-    bytes m_icon;
     address root;
-    address[] auctions;
     uint256 publicKey;
-
-    bool __got_x;
-    uint128 __x;
+    mapping(address => AuctionScenarioData) auctions;
 
     /*---------------------------------------------------------------------\
     |                                                                      |
-    |                              METHODS                                 |
+    |                             MENU METHODS                             |
     |                                                                      |
     \---------------------------------------------------------------------*/
 
-    function start() public override {
-        __got_x = false;
-        Terminal.input(tvm.functionId(savePublicKey), "Enter your public key:", false);
-        AddressInput.get(tvm.functionId(saveRootAddress),"Enter root contract's address:");
-        _menu();
-    }
-
     function _menu() private {
-        string sep = '----------------------------------------';
+        uint64 x = uint64(1 << 64);
+        // Terminal.print(0, format("{}", x));
+        // string sep = '----------------------------------------';
+        string sep = format("{}", x);
         Menu.select(
             sep + "\nAuctionRootDebot menu",
             sep,
             [
                 MenuItem("startAuctionScenario", "",tvm.functionId(startAuctionScenario)),
-                MenuItem("continueAuctionScenario", "",tvm.functionId(continueAuctionScenario)),
+                MenuItem("endAuction", "",tvm.functionId(endAuction)),
                 MenuItem("getRootInfo", "",tvm.functionId(getRootInfo)),
                 MenuItem("test", "",tvm.functionId(test))
             ]
@@ -68,39 +78,42 @@ contract HelloDebot is Debot {
     }
 
     function startAuctionScenario(uint32 index) public {
-        address n;
-        IAuctionRoot(root).startAuctionScenario{
-            abiVer: 2,
-            extMsg: true,
-            sign: true,
-            pubkey: publicKey,
-            time: uint64(now),
-            expire: now + 100,
-            callbackId: tvm.functionId(startAuctionScenario_),
-            onErrorId: tvm.functionId(onError)
-        }(
-            100500,
-            n,
-            now + 1000,
-            10,
-            10,
-            publicKey
+        AddressInput.get(
+            tvm.functionId(__saveLotGiver),
+            "Enter the lot giver address:"
         );
     }
 
-    function startAuctionScenario_(address auction_) public {
-        Terminal.print(0, format("\nNew auction's address: {}", auction_));
-        auctions.push(auction_);
+    function startAuctionScenario_(
+        address auction
+    ) public {
+        Terminal.print(0, "Some usefull info coming...");
+        address none;
+        auctions[auction] = AuctionScenarioData({
+            lotGiver: __lotGiver,
+            bidGiver: none,
+            lotReciever: none,
+            bidReciever: __bidReciever,
+
+            startTime: __startTime,
+            biddingDuration: __biddingDuration,
+            revealingDuration: __revealingDuration,
+            transferDuration: __transferDuration,
+
+            ended: false
+        });
         _menu();
     }
 
-    function continueAuctionScenario(uint32 index) public {
-        Terminal.print(0, "Hack you!2");
-        _menu();
+    function endAuction(uint32 index) public {
+        AddressInput.get(
+            tvm.functionId(endAuction_),
+            "Auction to end (address):"
+        );
     }
 
-    function continueAuctionScenario_(uint32 index) public {
-        Terminal.print(0, "Hack you!2");
+    function endAuction_(address value) public {
+        IAuction(value).end();
         _menu();
     }
 
@@ -124,22 +137,23 @@ contract HelloDebot is Debot {
     }
 
     function test(uint32 index) public {
-        Terminal.print(0, format("Hello World!"));
+        Terminal.print(0, "Hello World!");
         _menu();
     }
 
     /*---------------------------------------------------------------------\
     |                                                                      |
-    |                        READING CHAINS                                |
+    |                              READING                                 |
     |                                                                      |
     \---------------------------------------------------------------------*/
 
+    // on startup
     function savePublicKey(string value) public {
         (uint res, bool status) = stoi("0x"+value);
         if (status) {
             publicKey = res;
         } else {
-            Terminal.input(
+            Terminal.inputStr(
                 tvm.functionId(savePublicKey),
                 "Wrong public key. Try again!\nPlease enter your public key",
                 false
@@ -151,11 +165,82 @@ contract HelloDebot is Debot {
         root = value;
     }
 
+    // to start auction scenario
+    address __bidReciever;
+    address __lotGiver;
+    uint __startTime;
+    uint __biddingDuration;
+    uint __revealingDuration;
+    uint __transferDuration;
+
+    function __saveLotGiver(address value) public {
+        __lotGiver = value;
+        AddressInput.get(
+            tvm.functionId(__saveBidReciever),
+            "Bid reciever's address:"
+        );
+    }
+
+    function __saveBidReciever(address value) public {
+        __bidReciever = value;
+        Terminal.inputUint(
+            tvm.functionId(__saveStartTime),
+            "Enter auction's start time (epoche time):"
+        );
+    }
+
+    function __saveStartTime(uint256 value) public {
+        __startTime = uint(value);
+        Terminal.inputUint(
+            tvm.functionId(__saveBiddingDuration),
+            "Enter auction's bidding stage's duration (seconds):"
+        );
+    }
+
+    function __saveBiddingDuration(uint256 value) public {
+        __biddingDuration = uint(value);
+        Terminal.inputUint(
+            tvm.functionId(__saveRevealingDuration),
+            "Enter auction's revealing stage's duration (seconds):"
+        );
+    }
+
+    function __saveRevealingDuration(uint256 value) public {
+        __revealingDuration = uint(value);
+        Terminal.inputUint(
+            tvm.functionId(__saveTransferDuration),
+            "Enter auction's final transfer stage's duration (seconds):"
+        );
+    }
+
+    function __saveTransferDuration(uint256 value) public {
+        __transferDuration = uint(value);
+        IAuctionRoot(root).startAuctionScenario{
+            abiVer: 2,
+            extMsg: true,
+            sign: true,
+            pubkey: publicKey,
+            time: uint64(now),
+            expire: now + 100,
+            callbackId: tvm.functionId(startAuctionScenario_),
+            onErrorId: tvm.functionId(onError)
+        }({
+            lotGiver: __lotGiver,
+            bidReciever: __bidReciever,
+            startTime: __startTime,
+            biddingDuration: __biddingDuration,
+            revealingDuration: __revealingDuration,
+            transferDuration: __transferDuration
+        });
+    }
+
     /*---------------------------------------------------------------------\
     |                                                                      |
     |                            TECHNICAL                                 |
     |                                                                      |
     \---------------------------------------------------------------------*/
+    
+    bytes m_icon;
 
     function setIcon(bytes icon) public {
         require(msg.pubkey() == tvm.pubkey(), 100);
@@ -182,6 +267,12 @@ contract HelloDebot is Debot {
 
     function onError(uint32 sdkError, uint32 exitCode) public {
         Terminal.print(0, format("Oooops!\nsdkError: {}, exitCode: {}", sdkError, exitCode));
+        _menu();
+    }
+
+    function start() public override {
+        Terminal.inputStr(tvm.functionId(savePublicKey), "Enter your public key:", false);
+        AddressInput.get(tvm.functionId(saveRootAddress),"Enter root contract's address:");
         _menu();
     }
 }

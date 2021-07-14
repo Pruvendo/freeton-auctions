@@ -6,7 +6,7 @@ GIVER_ADDRESS=0:d5f5cfc4b52d2eb1bd9d3a8e51707872c7ce0c174facddd0e06ae5ffd17d2fcd
 
 function nice_echo() {
     local w=$(tput cols)
-    python -c "s=\"#\"*(($w - len(\"$1\"))//2 - 1);print(\"\n\" + s + (\" $1 \" if \"$1\" else \"##\") + s)"
+    python -c "s=\"#\"*(($w - len(\"$1\"))//2 - 1);print(\"\n\" + s + (\" $1 \" if \"$1\" else \"###\") + s)"
 }
 
 trap "
@@ -85,8 +85,7 @@ tonos-cli --url $NETWORK \
     "{
         \"auctionCode_\": \"$auc_code\",
         \"giverCode_\": \"$giver_code\",
-        \"bidCode_\": \"$bid_code\",
-        \"rootId_\": 0
+        \"bidCode_\": \"$bid_code\"
     }";
 
 
