@@ -37,7 +37,6 @@ contract Auction is IAuction {
     |                                                                      |
     \---------------------------------------------------------------------*/
 
-    // mapping(address => BidData) public bids;
     uint public number_of_bids;
     BidData public winner;
     bool public ended;
