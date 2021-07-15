@@ -1,6 +1,8 @@
 /* solhint-disable */
 pragma ton-solidity >= 0.35.0;
 pragma AbiHeader expire;
+pragma AbiHeader time;
+pragma AbiHeader pubkey;
 
 import "Interfaces.sol";
 
@@ -37,7 +39,7 @@ contract Auction is IAuction {
     |                                                                      |
     \---------------------------------------------------------------------*/
 
-    uint public number_of_bids;
+    uint public numberOfBids;
     BidData public winner;
     bool public ended;
 
@@ -114,6 +116,25 @@ contract Auction is IAuction {
             lotReciever: winner.lotReciever,
             data: data
         });
+    }
+
+    function getInfo() override public view returns(
+        uint,
+        address,
+        address,
+        uint128,
+        bool
+    ) {
+        require(tvm.pubkey() == msg.pubkey(), 101);
+        tvm.accept();
+
+        return (
+            numberOfBids,
+            winner.bidGiver,
+            winner.lotReciever,
+            winner.amount,
+            ended
+        );
     }
 
     function addressFitsCode(

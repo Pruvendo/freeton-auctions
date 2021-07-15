@@ -1,6 +1,7 @@
 /* solhint-disable */
 pragma ton-solidity >= 0.35.0;
 pragma AbiHeader expire;
+pragma AbiHeader time;
 
 interface IAuction {
     function end() external;
@@ -8,6 +9,14 @@ interface IAuction {
     // revealBid has to be called by Bid instance only
     // (and revealBid check's Bid contract's code)
     function revealBid(uint256 secret, uint128 amount, TvmCell data) external;
+
+    function getInfo() external view returns(
+        uint numberOfBids,
+        address bidGiver,
+        address lotReciever,
+        uint128 amount,
+        bool ended
+    );
 }
 
 interface IRoot {

@@ -17,12 +17,14 @@ struct AuctionScenarioData {
     address bidGiver;
     address lotReciever;
     address bidReciever;
+    uint128 amount;
 
     uint startTime;
     uint biddingDuration;
     uint revealingDuration;
     uint transferDuration;
 
+    uint numberOfBids;
     bool ended;
 }
 
@@ -58,6 +60,8 @@ contract AuctionRootDebot is Debot {
             [
                 MenuItem("startAuctionScenario", "",tvm.functionId(startAuctionScenario)),
                 MenuItem("endAuction", "",tvm.functionId(endAuction)),
+                MenuItem("printInfo", "",tvm.functionId(printInfo)),
+                MenuItem("updateInfo", "",tvm.functionId(updateInfo)),
                 MenuItem("test", "",tvm.functionId(test))
             ]
         );
@@ -73,19 +77,21 @@ contract AuctionRootDebot is Debot {
     function startAuctionScenario_(
         address auction
     ) public {
-        Terminal.print(0, "Some usefull info coming...");
+        // Terminal.print(0, "Some usefull info coming...");
         address none;
         auctions[auction] = AuctionScenarioData({
             lotGiver: __lotGiver,
             bidGiver: none,
             lotReciever: none,
             bidReciever: __bidReciever,
+            amount: 0,
 
             startTime: __startTime,
             biddingDuration: __biddingDuration,
             revealingDuration: __revealingDuration,
             transferDuration: __transferDuration,
 
+            numberOfBids: 0,
             ended: false
         });
         _menu();
@@ -101,6 +107,58 @@ contract AuctionRootDebot is Debot {
     function endAuction_(address value) public {
         IAuction(value).end();
         _menu();
+    }
+
+    function printInfo(uint32 index) public {
+        string sep = '----------------------------------------';
+        Terminal.print(0, format("\n{}\nRoot's address: {}", sep, root));
+        Terminal.print(0, format("{} is now", now));
+        if (auctions.empty()) {
+            Terminal.print(0, "No auctions started yet");
+            _menu();
+        } else {
+            Terminal.print(0, "Auctions:");
+            address key = address(0);
+            (address max_key, AuctionScenarioData _) = auctions.max().get();
+            AuctionScenarioData value;
+            do {
+                (key, value) = auctions.next(key).get();
+                Terminal.print(0, format("  Auction's address: {}", key));
+                Terminal.print(0, format("    Auction's lotGiver: {}", value.lotGiver));
+                Terminal.print(0, format("    Auction's bidReciever: {}", value.bidReciever));
+                Terminal.print(0, format("    Auction's winner.bidGiver: {}", value.bidGiver));
+                Terminal.print(0, format("    Auction's winner.lotReciever: {}", value.lotReciever));
+                Terminal.print(0, format("    Auction's winner.amount: {}", value.amount));
+                Terminal.print(0, format("    Auction's startTime: {}", value.startTime));
+                Terminal.print(0, format("    Auction's biddingDuration: {}", value.biddingDuration));
+                Terminal.print(0, format("    Auction's revealingDuration: {}", value.revealingDuration));
+                Terminal.print(0, format("    Auction's transferDuration: {}", value.transferDuration));
+                Terminal.print(0, format("    Auction ended: {}", value.ended ? "yes" : "no"));
+            } while (key != max_key);
+            
+        }
+        _menu();
+    }
+
+    function updateInfo(uint32 index) public {
+        if (auctions.empty()) {
+            Terminal.print(0, "No auctions started yet");
+        } else {
+            Terminal.print(0, "Wait...");
+            (address key, AuctionScenarioData _) = auctions.min().get();
+            
+            optional(uint256) none;
+            IAuction(key).getInfo{
+                abiVer: 2,
+                extMsg: true,
+                sign: true,
+                pubkey: publicKey,
+                time: 0,
+                expire: 0,
+                callbackId: tvm.functionId(updateInfo_),
+                onErrorId: tvm.functionId(onError)
+            }();
+        }
     }
 
     function test(uint32 index) public {
@@ -199,6 +257,23 @@ contract AuctionRootDebot is Debot {
             revealingDuration: __revealingDuration,
             transferDuration: __transferDuration
         });
+    }
+
+    function updateInfo_(
+        uint numberOfBids,
+        address bidGiver,
+        address lotReciever,
+        uint128 amount,
+        bool ended
+    ) public {
+        if (auctions.exists(msg.sender)) {
+            auctions[msg.sender].numberOfBids = numberOfBids;
+            auctions[msg.sender].bidGiver = bidGiver;
+            auctions[msg.sender].lotReciever = lotReciever;
+            auctions[msg.sender].amount = amount;
+            auctions[msg.sender].ended = ended;
+        }
+        _menu();
     }
 
     /*---------------------------------------------------------------------\
