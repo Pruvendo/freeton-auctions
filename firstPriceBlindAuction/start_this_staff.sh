@@ -36,7 +36,7 @@ tondev sol compile AuctionRoot.sol > /dev/null
 temp=$(../static/tvm_linker decode --tvc AuctionRoot.tvc)
 auc_root_code=$(echo $temp | grep -oP 'code: \K\S+')
 
-tondev sol compile Bid.sol > /dev/null
+tondev sol compile BidNativeCurrency.sol > /dev/null
 temp=$(../static/tvm_linker decode --tvc Bid.tvc)
 bid_code=$(echo $temp | grep -oP 'code: \K\S+')
 

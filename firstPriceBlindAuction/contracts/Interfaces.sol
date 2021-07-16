@@ -10,12 +10,30 @@ interface IAuction {
     // (and revealBid check's Bid contract's code)
     function revealBid(uint256 secret, uint128 amount, TvmCell data) external;
 
-    function getInfo() external view returns(
+    function getUpdateableInfo() external view returns(
         uint numberOfBids,
         address bidGiver,
         address lotReciever,
         uint128 amount,
         bool ended
+    );
+
+    function getAllInfo() external view returns(
+        uint startTime_,
+        uint biddingDuration_,
+        uint revealingDuration_,
+        uint transferDuration_,
+
+        address lotGiver_,
+        address bidReciever_,
+
+        address bidGiver_,
+        address lotReciever_,
+        uint128 amount_,
+
+        address root_,
+        uint numberOfBids_,
+        bool ended_
     );
 }
 

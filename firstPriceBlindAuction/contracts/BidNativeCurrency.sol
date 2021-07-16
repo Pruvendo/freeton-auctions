@@ -1,6 +1,8 @@
 /* solhint-disable */
 pragma ton-solidity >= 0.35.0;
 pragma AbiHeader expire;
+pragma AbiHeader time;
+pragma AbiHeader pubkey;
 
 import "Interfaces.sol";
 
@@ -23,7 +25,6 @@ contract Bid is IBid {
 
     constructor() public {
         require(tvm.pubkey() != 0, 101);
-        require(msg.sender == auction, 102);
     }
 
     function reveal(

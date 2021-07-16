@@ -60,7 +60,7 @@ contract Auction is IAuction {
         uint128 amount,
         TvmCell data
     ) override external {
-        require(addressFitsCode(msg.sender, bidGiverCode, data), 102);
+        require(addressFitsCode(msg.sender, bidGiverCode, data, msg.pubkey()), 102);
 
         (
             uint __startTime,
@@ -76,6 +76,8 @@ contract Auction is IAuction {
         ) = data.toSlice().decode(
             uint, uint, uint, uint, address, address, address, uint256
         );
+
+        // require(data is correct)
 
         // require(tvm.checkSign(?????), 201);
     
@@ -118,16 +120,13 @@ contract Auction is IAuction {
         });
     }
 
-    function getInfo() override public view returns(
+    function getUpdateableInfo() override public view returns(
         uint,
         address,
         address,
         uint128,
         bool
     ) {
-        require(tvm.pubkey() == msg.pubkey(), 101);
-        tvm.accept();
-
         return (
             numberOfBids,
             winner.bidGiver,
@@ -137,14 +136,49 @@ contract Auction is IAuction {
         );
     }
 
+    function getAllInfo() override public view returns(
+        uint startTime_,
+        uint biddingDuration_,
+        uint revealingDuration_,
+        uint transferDuration_,
+
+        address lotGiver_,
+        address bidReciever_,
+
+        address bidGiver_,
+        address lotReciever_,
+        uint128 amount_,
+
+        address root_,
+        uint numberOfBids_,
+        bool ended_
+    ) {
+        startTime_ = startTime;
+        biddingDuration_ = biddingDuration;
+        revealingDuration_ = revealingDuration;
+        transferDuration_ = transferDuration;
+
+        lotGiver_ = lotGiver;
+        bidReciever_ = bidReciever;
+
+        bidGiver_ = winner.bidGiver;
+        lotReciever_ = winner.lotReciever;
+        amount_ = winner.amount;
+
+        root_ = root;
+        numberOfBids_ = numberOfBids;
+        ended_ = ended;
+    }
+
     function addressFitsCode(
         address sender,
         TvmCell code,
-        TvmCell data
+        TvmCell data,
+        uint256 pubkey
     ) private returns (bool) {
 
         TvmCell stateInit = tvm.buildStateInit(code, data);
-        TvmCell stateInitWithKey = tvm.insertPubkey(stateInit, tvm.pubkey());
+        TvmCell stateInitWithKey = tvm.insertPubkey(stateInit, pubkey);
     
         address addr = address(tvm.hash(stateInitWithKey));
         return addr == sender;

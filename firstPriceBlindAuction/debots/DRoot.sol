@@ -77,7 +77,6 @@ contract AuctionRootDebot is Debot {
     function startAuctionScenario_(
         address auction
     ) public {
-        // Terminal.print(0, "Some usefull info coming...");
         address none;
         auctions[auction] = AuctionScenarioData({
             lotGiver: __lotGiver,
@@ -135,7 +134,6 @@ contract AuctionRootDebot is Debot {
                 Terminal.print(0, format("    Auction's transferDuration: {}", value.transferDuration));
                 Terminal.print(0, format("    Auction ended: {}", value.ended ? "yes" : "no"));
             } while (key != max_key);
-            
         }
         _menu();
     }
@@ -144,15 +142,14 @@ contract AuctionRootDebot is Debot {
         if (auctions.empty()) {
             Terminal.print(0, "No auctions started yet");
         } else {
-            Terminal.print(0, "Wait...");
             (address key, AuctionScenarioData _) = auctions.min().get();
             
             optional(uint256) none;
-            IAuction(key).getInfo{
+            IAuction(key).getUpdateableInfo{
                 abiVer: 2,
                 extMsg: true,
-                sign: true,
-                pubkey: publicKey,
+                sign: false,
+                pubkey: none,
                 time: 0,
                 expire: 0,
                 callbackId: tvm.functionId(updateInfo_),

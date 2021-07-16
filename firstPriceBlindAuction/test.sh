@@ -5,7 +5,7 @@ set -e
 cd contracts/
 tondev sol compile Auction.sol;
 tondev sol compile AuctionRoot.sol;
-tondev sol compile Bid.sol;
+tondev sol compile BidNativeCurrency.sol;
 # tondev sol compile Bidder.sol;
 tondev sol compile DumbReciever.sol;
 tondev sol compile Giver.sol;
