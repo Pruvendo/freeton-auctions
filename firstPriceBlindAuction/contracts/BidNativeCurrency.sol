@@ -5,27 +5,16 @@ pragma AbiHeader time;
 pragma AbiHeader pubkey;
 
 import "Interfaces.sol";
+import "GiverNativeCurrency.sol";
 
-contract Bid is IBid {
+contract Bid is Giver {
 
-    uint static public startTime;
-    uint static public biddingDuration;
-    uint static public revealingDuration;
-    uint static public transferDuration;
-
-    address static public root;
     address static public auction;
     address static public lotReciever;
 
     uint256 static public amountHash;
-    uint128 public amount;
     uint256 public secret;
 
-    // here can be any additional information
-
-    constructor() public {
-        require(tvm.pubkey() != 0, 101);
-    }
 
     function reveal(
         uint128 amount_,
@@ -56,27 +45,5 @@ contract Bid is IBid {
         TvmCell data = builder.toCell();
 
         IAuction(auction).revealBid(secret, amount, data);
-    }
-
-    function transferRemainsTo(address destination) override external {
-        require(tvm.pubkey() == msg.pubkey(), 102);
-        require(
-            now >= (startTime + biddingDuration + revealingDuration + transferDuration),
-            103
-        );
-        tvm.accept();
-
-        destination.transfer({
-            value: 0 ton,
-            bounce: false,
-            flag: 128
-        });
-    }
-
-    function transferTo(address destination) override external {
-        require(msg.sender == root, 102);
-        tvm.accept();
-
-        destination.transfer(amount, false);
     }
 }

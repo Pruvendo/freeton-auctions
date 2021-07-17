@@ -37,11 +37,11 @@ temp=$(../static/tvm_linker decode --tvc AuctionRoot.tvc)
 auc_root_code=$(echo $temp | grep -oP 'code: \K\S+')
 
 tondev sol compile BidNativeCurrency.sol > /dev/null
-temp=$(../static/tvm_linker decode --tvc Bid.tvc)
+temp=$(../static/tvm_linker decode --tvc BidNativeCurrency.tvc)
 bid_code=$(echo $temp | grep -oP 'code: \K\S+')
 
-tondev sol compile Giver.sol > /dev/null
-temp=$(../static/tvm_linker decode --tvc Giver.tvc)
+tondev sol compile GiverNativeCurrency.sol > /dev/null
+temp=$(../static/tvm_linker decode --tvc GiverNativeCurrency.tvc)
 giver_code=$(echo $temp | grep -oP 'code: \K\S+')
 
 

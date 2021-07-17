@@ -8,6 +8,7 @@ interface IAuction {
     
     // revealBid has to be called by Bid instance only
     // (and revealBid check's Bid contract's code)
+    // Here's the formal difference between Bid and Giver
     function revealBid(uint256 secret, uint128 amount, TvmCell data) external;
 
     function getUpdateableInfo() external view returns(
@@ -60,11 +61,7 @@ interface IRoot {
 interface IGiver {
     // this method has to be allowed for the root contract only
     function transferTo(address destination) external;
-}
 
-// IBid has to be able to call IAuction.revealBid
-interface IBid is IGiver {
-
-    //can be called only by deployer and only after transfer stage
     function transferRemainsTo(address destination) external;
 }
+
