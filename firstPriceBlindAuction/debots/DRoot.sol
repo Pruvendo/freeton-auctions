@@ -24,7 +24,6 @@ struct AuctionScenarioData {
     uint revealingDuration;
     uint transferDuration;
 
-    uint numberOfBids;
     bool ended;
 }
 
@@ -90,7 +89,6 @@ contract AuctionRootDebot is Debot {
             revealingDuration: __revealingDuration,
             transferDuration: __transferDuration,
 
-            numberOfBids: 0,
             ended: false
         });
         _menu();
@@ -257,14 +255,12 @@ contract AuctionRootDebot is Debot {
     }
 
     function updateInfo_(
-        uint numberOfBids,
         address bidGiver,
         address lotReciever,
         uint128 amount,
         bool ended
     ) public {
         if (auctions.exists(msg.sender)) {
-            auctions[msg.sender].numberOfBids = numberOfBids;
             auctions[msg.sender].bidGiver = bidGiver;
             auctions[msg.sender].lotReciever = lotReciever;
             auctions[msg.sender].amount = amount;

@@ -5,6 +5,7 @@ pragma AbiHeader time;
 pragma AbiHeader pubkey;
 
 import "Interfaces.sol";
+import "BidNativeCurrency.sol";
 
 struct BidData {
     address bidGiver;
@@ -22,16 +23,16 @@ contract Auction is IAuction {
 
     uint static public a_id;
 
-    uint static public startTime;
-    uint static public biddingDuration;
-    uint static public revealingDuration;
-    uint static public transferDuration;
+    uint public startTime;
+    uint public biddingDuration;
+    uint public revealingDuration;
+    uint public transferDuration;
 
-    address static public lotGiver;
-    address static public bidReciever;
+    address public lotGiver;
+    address public bidReciever;
 
-    TvmCell static public bidGiverCode;
-    address static public root;
+    TvmCell public bidGiverCode;
+    address public root;
 
     /*---------------------------------------------------------------------\
     |                                                                      |
@@ -39,7 +40,6 @@ contract Auction is IAuction {
     |                                                                      |
     \---------------------------------------------------------------------*/
 
-    uint public numberOfBids;
     BidData public winner;
     bool public ended;
 
@@ -49,49 +49,72 @@ contract Auction is IAuction {
     |                                                                      |
     \---------------------------------------------------------------------*/
 
-    constructor() public {
+    constructor(
+        uint a_id_,
+
+        uint startTime_,
+        uint biddingDuration_,
+        uint revealingDuration_,
+        uint transferDuration_,
+
+        address lotGiver_,
+        address bidReciever_,
+
+        TvmCell bidGiverCode_,
+        address root_
+    ) public {
         require(tvm.pubkey() != 0, 101);
-        require(msg.sender == root, 102);
+        require(msg.sender == root_, 102);
+        
         ended = false;
+        a_id = a_id_;
+        startTime = startTime_;
+        biddingDuration = biddingDuration_;
+        revealingDuration = revealingDuration_;
+        transferDuration = transferDuration_;
+        lotGiver = lotGiver_;
+        bidReciever = bidReciever_;
+        bidGiverCode = bidGiverCode_;
+        root = root_;
     }
 
     function revealBid(
-        uint256 secret,
-        uint128 amount,
-        TvmCell data
+        uint256 secret_,
+        uint128 amount_,
+        uint startTime_,
+        uint biddingDuration_,
+        uint revealingDuration_,
+        uint transferDuration_,
+        address root_,
+        address auction_,
+        address lotReciever_,
+        uint256 amountHash_
     ) override external {
-        require(addressFitsCode(msg.sender, bidGiverCode, data, msg.pubkey()), 102);
 
-        (
-            uint __startTime,
-            uint __biddingDuration,
-            uint __revealingDuration,
-            uint __transferDuration,
+        require(startTime_ == startTime, 777);
+        require(biddingDuration_ == biddingDuration, 777);
+        require(revealingDuration_ == revealingDuration, 777);
+        require(transferDuration_ == transferDuration, 777);
+        require(root_ == root, 777);
+        require(auction_ == address(this), 777);
 
-            address __root,
-            address __auction,
-            address __lotReciever,
-
-            uint256 __amountHash
-        ) = data.toSlice().decode(
-            uint, uint, uint, uint, address, address, address, uint256
-        );
-
-        // require(data is correct)
-
-        // require(tvm.checkSign(?????), 201);
+        require(addressFitsCode(
+            msg.sender,
+            msg.pubkey()
+        ), 666);
     
-        if (winner.bidGiver.isNone() || winner.amount < amount) {
+        if (winner.bidGiver.isNone() || winner.amount < amount_) {
             winner = BidData({
                 bidGiver: msg.sender,
-                lotReciever: __lotReciever, //TODO: data???
-                amount: amount
+                lotReciever: lotReciever_, //TODO: data???
+                amount: amount_
             });
         }
     }
 
     function end() override public {
         require(!ended, 102);
+        require(winner.lotReciever != address(0));
         require(now >= (startTime + biddingDuration + revealingDuration), 103);
         tvm.accept();
         
@@ -99,15 +122,7 @@ contract Auction is IAuction {
 
         TvmBuilder builder;
         builder.store(
-            a_id,
-            startTime,
-            biddingDuration,
-            revealingDuration,
-            transferDuration,
-            lotGiver,
-            bidReciever,
-            bidGiverCode,
-            root
+            a_id
         );
         TvmCell data = builder.toCell();
         
@@ -121,14 +136,12 @@ contract Auction is IAuction {
     }
 
     function getUpdateableInfo() override public view returns(
-        uint,
         address,
         address,
         uint128,
         bool
     ) {
         return (
-            numberOfBids,
             winner.bidGiver,
             winner.lotReciever,
             winner.amount,
@@ -150,7 +163,6 @@ contract Auction is IAuction {
         uint128 amount_,
 
         address root_,
-        uint numberOfBids_,
         bool ended_
     ) {
         startTime_ = startTime;
@@ -166,21 +178,23 @@ contract Auction is IAuction {
         amount_ = winner.amount;
 
         root_ = root;
-        numberOfBids_ = numberOfBids;
         ended_ = ended;
     }
 
     function addressFitsCode(
         address sender,
-        TvmCell code,
-        TvmCell data,
         uint256 pubkey
-    ) private returns (bool) {
+    ) private inline view returns (bool) {
 
-        TvmCell stateInit = tvm.buildStateInit(code, data);
-        TvmCell stateInitWithKey = tvm.insertPubkey(stateInit, pubkey);
+        return true;
+        TvmCell stateInit = tvm.buildStateInit({
+            code: bidGiverCode,
+            contr: Bid,
+            varInit: {},
+            pubkey: pubkey
+        });
     
-        address addr = address(tvm.hash(stateInitWithKey));
+        address addr = address(tvm.hash(stateInit));
         return addr == sender;
     }
 }

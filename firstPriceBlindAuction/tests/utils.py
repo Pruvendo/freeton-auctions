@@ -3,10 +3,36 @@ import random
 
 import tonos_ts4.ts4 as ts4
 
+from dataclasses import dataclass
+
 
 LOGGER = logging.getLogger(__name__)
-owners_bidder: dict[str, (ts4.BaseContract, (str, str))] = {}
+HASH_CALCULATOR = ts4.BaseContract(
+    'HashCalc',
+    {},
+    balance=10**10,
+)
+ts4.dispatch_messages()
 
+@dataclass
+class User:
+    bid_giver: ts4.BaseContract
+    bid_back_reciever: ts4.BaseContract
+    lot_reciever: ts4.BaseContract
+    keypair: (str, str)
+    secret: str
+
+users: dict[str, User] = {}
+
+
+def magic_hash(amount, secret):
+    return HASH_CALCULATOR.call_method(
+        'calc',
+        dict(
+            amount=amount,
+            secret=secret
+        ),
+    )
 
 def dumb_reciever():
     return ts4.BaseContract(
@@ -18,80 +44,123 @@ def dumb_reciever():
     )
 
 
-def make_bid(auction_address, value, owner, expect_ec=0, amount_hash='0'):
-    ts4.Address.ensure_address(auction_address)
-    reciever = dumb_reciever()
-    ts4.dispatch_messages()
+def make_bid(
+    *,
+    username,
+    start_time,
+    bidding_duration,
+    revealing_duration,
+    transfer_duration,
+    root_address,
+    auction_address,
+    lot_reciever,
+    bid_back_reciever,
+    amount,
+    value,
+    secret,
+):
+    amount_hash = magic_hash(amount, secret)
     keypair = ts4.make_keypair()
-    bidder = ts4.BaseContract(
-        'Bidder',
+    bid = ts4.BaseContract(
+        'BidNativeCurrency',
         dict(
-            amountHash_=amount_hash,
+            startTime_=start_time,
+            biddingDuration_=bidding_duration,
+            revealingDuration_=revealing_duration,
+            transferDuration_=transfer_duration,
+            root_=root_address,
             auction_=auction_address,
-            reciever_=reciever.address,
+            lotReciever_=lot_reciever.address,
+            amountHash_=amount_hash,
+            bidGiverCode_=ts4.load_code_cell('BidNativeCurrency')
         ),
-        keypair=keypair,
         balance=value,
+        keypair=keypair,
     )
-    bidder.call_method(
-        'toBid',
-        expect_ec=expect_ec,
-        private_key=keypair[0],
+    user = User(
+        bid_giver=bid,
+        lot_reciever=lot_reciever,
+        bid_back_reciever=bid_back_reciever,
+        keypair=keypair,
+        secret=secret
     )
-    bidder.prize_reciever = reciever
-    ts4.dispatch_messages()
-    owners_bidder[owner] = (bidder, keypair)
+    users[username] = user
 
 
-def reveal_bid(amount, owner, expect_ec=0):
+def reveal_bid(auction, amount, username, expect_ec=0):
     ts4.dispatch_messages()
-    bidder = owners_bidder[owner][0]
-    bidder.call_method(
-        'toReveal',
+    user = users[username]
+    bid = user.bid_giver
+    bid.call_method(
+        'reveal',
         dict(
-            amount=amount,
+            amount_=amount,
+            secret_=user.secret,
         ),
-        expect_ec=expect_ec
+        expect_ec=expect_ec,
+        private_key=bid.private_key_
     )
+    for param in (
+        'startTime',
+        'biddingDuration',
+        'revealingDuration',
+        'transferDuration',
+        'root',
+    ):
+        assert auction.call_getter(param) == bid.call_getter(param)
+    assert auction.address == bid.call_getter('auction')
+    assert user.lot_reciever.address == bid.call_getter('lotReciever')
+    assert magic_hash(amount, user.secret) == bid.call_getter('amountHash')
+    assert (bid.private_key_, bid.public_key_) == user.keypair
+    assert auction.call_getter('bidGiverCode') == ts4.load_code_cell('BidNativeCurrency')
     ts4.dispatch_messages()
 
 
-def take_bid_back(owner, expect_ec=0):
+def take_bid_back(username, expect_ec=0):
     ts4.dispatch_messages()
-    bidder = owners_bidder[owner][0]
-    bidder.call_method('takeBidBack')
+    user = users[username]
+    bid = user.bid_giver
+    bid.call_method(
+        'transferRemainsTo',
+        dict(
+            destination=user.bid_back_reciever.address
+        ),
+        private_key=user.keypair[0],
+    )
     ts4.dispatch_one_message(expect_ec=expect_ec)
 
 
-def balance(owner):
-    bidder = owners_bidder[owner][0]
+def balance(username):
     ts4.dispatch_messages()
-    return bidder.balance
+    user = users[username]
+    return user.bid_back_reciever.balance
 
 
-def prize_balance(owner):
-    bidder = owners_bidder[owner][0]
+def prize_balance(username):
+    user = users[username]
     ts4.dispatch_messages()
-    return bidder.prize_reciever.balance
+    return user.lot_reciever.balance
 
 
 def make_auction_contract(
     root_contract,
+    lot_giver,
     start_time,
     bidding_duration,
     revealing_duration,
+    transfer_duration,
 ):
     reciever = dumb_reciever()
     ts4.dispatch_messages()
     auction_address = root_contract.call_method(
         'startAuctionScenario',
         dict(
-            prize=100500,
+            lotGiver=lot_giver.address,
             bidReciever=reciever.address,
             startTime=start_time,
             biddingDuration=bidding_duration,
             revealingDuration=revealing_duration,
-            publicKey=ts4.make_keypair()[1],
+            transferDuration=transfer_duration,
         ),
         private_key=root_contract.private_key_,
     )
@@ -105,4 +174,28 @@ def make_auction_contract(
     )
     ts4.dispatch_messages()
     res.bid_reciever = reciever
+    res.lot_giver = lot_giver
     return res
+
+
+def make_lot_giver(
+        prize,
+        start_time,
+        bidding_duration,
+        revealing_duration,
+        transfer_duration,
+        root_address,
+    ) -> ts4.BaseContract:
+    
+    return ts4.BaseContract(
+        'GiverNativeCurrency',
+        dict(
+            startTime_=start_time,
+            biddingDuration_=bidding_duration,
+            revealingDuration_=revealing_duration,
+            transferDuration_=transfer_duration,
+            root_=root_address,
+        ),
+        balance=prize,
+        keypair=ts4.make_keypair()
+    )

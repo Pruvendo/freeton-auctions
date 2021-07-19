@@ -1,7 +1,5 @@
 import pathlib
-import time
 import logging
-import random
 
 import tonos_ts4.ts4 as ts4
 
@@ -19,15 +17,15 @@ def fix_path(pytestconfig):
 
 @fixture(scope='session')
 def root_contract():
-    auction_code = ts4.load_code_cell('Auction.tvc')
-    giver_code = ts4.load_code_cell('Giver.tvc')
-    bid_code = ts4.load_code_cell('Bid.tvc')
+    auction_code = ts4.load_code_cell('Auction')
+    giver_code = ts4.load_code_cell('GiverNativeCurrency')
+    bid_code = ts4.load_code_cell('BidNativeCurrency')
     return ts4.BaseContract(
         'AuctionRoot',
         dict(
             auctionCode_=auction_code,
-            giverCode_=giver_code,
-            bidCode_=bid_code,
+            lotGiverCode_=giver_code,
+            bidGiverCode_=bid_code,
         ),
         balance=10 ** 12,
         keypair=ts4.make_keypair(),

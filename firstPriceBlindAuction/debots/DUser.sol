@@ -106,7 +106,6 @@ contract AuctionUserDebot is Debot {
         uint128 amount,
 
         address root,
-        uint numberOfBids,
         bool ended
     ) public {
         Terminal.print(0, format("  Auction's address: {}", msg.sender));
@@ -168,7 +167,6 @@ contract AuctionUserDebot is Debot {
         uint128 amount,
 
         address root,
-        uint numberOfBids,
         bool ended
     ) public {
         __startTime = startTime;

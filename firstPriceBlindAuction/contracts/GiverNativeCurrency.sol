@@ -7,16 +7,26 @@ pragma AbiHeader pubkey;
 import "Interfaces.sol";
 
 contract Giver is IGiver {
-
     uint static public startTime;
     uint static public biddingDuration;
     uint static public revealingDuration;
     uint static public transferDuration;
-    uint128 public amount;
     address static public root;
 
-    constructor() public {
+    constructor(
+        uint startTime_,
+        uint biddingDuration_,
+        uint revealingDuration_,
+        uint transferDuration_,
+        address root_
+    ) public {
         require(tvm.pubkey() != 0, 101);
+
+        startTime = startTime_;
+        biddingDuration = biddingDuration_;
+        revealingDuration = revealingDuration_;
+        transferDuration = transferDuration_;
+        root = root_;
     }
 
     function transferRemainsTo(address destination) override external {
@@ -38,6 +48,10 @@ contract Giver is IGiver {
         require(msg.sender == root, 102);
         tvm.accept();
 
-        destination.transfer(amount, false);
+        destination.transfer({
+            value: 0 ton,
+            bounce: false,
+            flag: 128
+        });
     }
 }

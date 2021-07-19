@@ -64,22 +64,21 @@ contract AuctionRoot is IRoot {
         auctionAddress = new Auction {
             code: auctionCode,
             value: 10 ton,
-            pubkey: tvm.pubkey(),
-            varInit: {
-                a_id: number_of_auctions,
+            pubkey: tvm.pubkey()
+        }({
+                a_id_: number_of_auctions,
 
-                startTime: startTime,
-                biddingDuration: biddingDuration,
-                revealingDuration: revealingDuration,
-                transferDuration: transferDuration,
+                startTime_: startTime,
+                biddingDuration_: biddingDuration,
+                revealingDuration_: revealingDuration,
+                transferDuration_: transferDuration,
 
-                lotGiver: lotGiver,
-                bidReciever: bidReciever,
+                lotGiver_: lotGiver,
+                bidReciever_: bidReciever,
 
-                bidGiverCode: bidGiverCode,
-                root: this
-            }
-        }();
+                bidGiverCode_: bidGiverCode,
+                root_: address(this)
+            });
 
         number_of_auctions += 1;
         return auctionAddress;
@@ -104,7 +103,7 @@ contract AuctionRoot is IRoot {
         address sender,
         TvmCell code,
         TvmCell data
-    ) private returns (bool) {
+    ) private inline view returns (bool) {
 
         TvmCell stateInit = tvm.buildStateInit(code, data);
         TvmCell stateInitWithKey = tvm.insertPubkey(stateInit, tvm.pubkey());

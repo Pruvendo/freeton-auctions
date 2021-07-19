@@ -9,10 +9,20 @@ interface IAuction {
     // revealBid has to be called by Bid instance only
     // (and revealBid check's Bid contract's code)
     // Here's the formal difference between Bid and Giver
-    function revealBid(uint256 secret, uint128 amount, TvmCell data) external;
+    function revealBid(
+        uint256 secret_,
+        uint128 amount_,
+        uint startTime_,
+        uint biddingDuration_,
+        uint revealingDuration_,
+        uint transferDuration_,
+        address root_,
+        address auction_,
+        address lotReciever_,
+        uint256 amountHash_
+    ) external;
 
     function getUpdateableInfo() external view returns(
-        uint numberOfBids,
         address bidGiver,
         address lotReciever,
         uint128 amount,
@@ -33,7 +43,6 @@ interface IAuction {
         uint128 amount_,
 
         address root_,
-        uint numberOfBids_,
         bool ended_
     );
 }
