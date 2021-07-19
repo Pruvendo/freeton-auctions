@@ -7,11 +7,11 @@ pragma AbiHeader pubkey;
 import "Interfaces.sol";
 
 contract Giver is IGiver {
-    uint static public startTime;
-    uint static public biddingDuration;
-    uint static public revealingDuration;
-    uint static public transferDuration;
-    address static public root;
+    uint public startTime;
+    uint public biddingDuration;
+    uint public revealingDuration;
+    uint public transferDuration;
+    address public root;
 
     constructor(
         uint startTime_,

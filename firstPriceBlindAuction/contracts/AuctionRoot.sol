@@ -27,9 +27,9 @@ contract AuctionRoot is IRoot {
 
     uint public number_of_auctions;
 
-    TvmCell static public auctionCode;
-    TvmCell static public lotGiverCode;
-    TvmCell static public bidGiverCode;
+    TvmCell public auctionCode;
+    TvmCell public lotGiverCode;
+    TvmCell public bidGiverCode;
 
     constructor(
         TvmCell auctionCode_,

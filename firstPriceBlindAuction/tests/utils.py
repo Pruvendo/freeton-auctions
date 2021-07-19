@@ -37,10 +37,9 @@ def magic_hash(amount, secret):
 def dumb_reciever():
     return ts4.BaseContract(
         'DumbReciever',
-        dict(
-            id_=random.randint(0, 100000),
-        ),
+        dict(),
         balance=10**9,
+        keypair=ts4.make_keypair(),
     )
 
 
