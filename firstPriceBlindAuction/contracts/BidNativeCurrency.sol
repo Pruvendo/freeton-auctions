@@ -38,7 +38,7 @@ contract Bid is IGiver {
         TvmCell bidGiverCode_
     ) public {
         require(tvm.pubkey() != 0, 101);
-
+        require(now < startTime_ + biddingDuration_, 103);
         startTime = startTime_;
         biddingDuration = biddingDuration_;
         revealingDuration = revealingDuration_;
@@ -77,6 +77,7 @@ contract Bid is IGiver {
         uint128 amount_,
         uint256 secret_
     ) public {
+        require(msg.value == 0, 104);
         require(secret == 0, 103);
         require(tvm.pubkey() == msg.pubkey(), 102);
     
@@ -107,5 +108,9 @@ contract Bid is IGiver {
             lotReciever_: lotReciever,
             amountHash_: amountHash
         });
+    }
+
+    receive() external {
+        require(false, 104);
     }
 }
