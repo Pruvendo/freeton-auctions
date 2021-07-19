@@ -175,10 +175,10 @@ contract AuctionUserDebot is Debot {
         __transferDuration = transferDuration;
         __root = root;
 
-        Terminal.inputUint(tvm.functionId(saveAmount), "How much nanotons do you wanna bid:");
+        Terminal.inputUint(tvm.functionId(__saveAmount), "How much nanotons do you wanna bid:");
     }
 
-    function saveAmount(uint128 amount) public {
+    function __saveAmount(uint128 amount) public {
         __amount = amount;
         AddressInput.get(
             tvm.functionId(__saveLotReciever),
@@ -188,14 +188,14 @@ contract AuctionUserDebot is Debot {
 
     function __saveLotReciever(address addr) public {
         __lotReciever = addr;
-        Sdk.mnemonicFromRandom(tvm.functionId(setMnemonic), 1, 12);
+        Sdk.mnemonicFromRandom(tvm.functionId(__setMnemonic), 1, 12);
     }
 
-    function setMnemonic(string phrase) public {
+    function __setMnemonic(string phrase) public {
         __secret = phrase;
         TvmBuilder builder;
         builder.store(
-            phrase,
+            tvm.hash(phrase),
             "Let me take you down, cos I'm going to Strawberry Fields Nothing is real and nothing to get hung about Strawberry Fields forever",
             __amount
         );
@@ -203,16 +203,6 @@ contract AuctionUserDebot is Debot {
 
         Terminal.print(0, "Now you're ready to deploy your bid.");
         
-        builder.store(
-            __startTime,
-            __biddingDuration,
-            __revealingDuration,
-            __transferDuration,
-            __root,
-            __auction,
-            __lotReciever,
-            __amountHash
-        );
         TvmCell stateInit = tvm.buildStateInit(bidGiverCode, builder.toCell());
         TvmCell stateInitWithKey = tvm.insertPubkey(stateInit, __ownerPubkey);
         address addr = address(tvm.hash(stateInitWithKey));
