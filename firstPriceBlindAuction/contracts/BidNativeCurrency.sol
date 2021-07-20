@@ -49,6 +49,26 @@ contract Bid is IGiver {
         amountHash = amountHash_;
 
         bidGiverCode = bidGiverCode_;
+
+        require(addressFitsCode(this, tvm.pubkey(), bidGiverCode), 777);
+        tvm.accept();
+    }
+
+    function addressFitsCode(
+        address sender,
+        uint256 pubkey,
+        TvmCell code
+    ) private inline view returns (bool) {
+
+        TvmCell stateInit = tvm.buildStateInit({
+            code: code,
+            contr: Bid,
+            varInit: {},
+            pubkey: pubkey
+        });
+    
+        address addr = address(tvm.hash(stateInit));
+        return addr == sender;
     }
 
     function transferRemainsTo(address destination) override external {
@@ -81,6 +101,8 @@ contract Bid is IGiver {
         require(secret == 0, 103);
         require(tvm.pubkey() == msg.pubkey(), 102);
     
+        tvm.accept();
+
         TvmBuilder builder;
         builder.store(
             secret_,
@@ -91,12 +113,11 @@ contract Bid is IGiver {
         require(amountHash == hash_, 201);
 
         require(address(this).balance >= amount + 2);
-        tvm.accept();
 
         amount = amount_;
         secret = secret_;
 
-        IAuction(auction).revealBid({
+        IAuction(auction).revealBid{value: 1 ton}({
             secret_: secret,
             amount_: amount,
             startTime_: startTime,

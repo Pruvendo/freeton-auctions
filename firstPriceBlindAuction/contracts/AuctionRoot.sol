@@ -7,22 +7,6 @@ pragma AbiHeader pubkey;
 import "Auction.sol";
 import "Interfaces.sol";
 
-struct AuctionScenarioData {
-    uint256 auctionPubKey;
-
-    address lotGiver;
-    address bidReciever;
-    address winnerBid;
-    address lotReciever;
-
-    uint startTime;
-    uint biddingDuration;
-    uint revealingDuration;
-    uint transferDuration;
-
-    bool ended;
-}
-
 contract AuctionRoot is IRoot {
 
     uint public number_of_auctions;

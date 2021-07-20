@@ -101,7 +101,7 @@ contract Auction is IAuction {
         require(addressFitsCode(
             msg.sender,
             msg.pubkey()
-        ), 666);
+        ), 777);
     
         if (winner.bidGiver.isNone() || winner.amount < amount_) {
             winner = BidData({

@@ -62,6 +62,12 @@ def make_bid(
     keypair = ts4.make_keypair()
     bid = ts4.BaseContract(
         'BidNativeCurrency',
+        None,
+        balance=value,
+        keypair=keypair,
+    )
+    bid.call_method(
+        'constructor',
         dict(
             startTime_=start_time,
             biddingDuration_=bidding_duration,
@@ -73,8 +79,7 @@ def make_bid(
             amountHash_=amount_hash,
             bidGiverCode_=ts4.load_code_cell('BidNativeCurrency')
         ),
-        balance=value,
-        keypair=keypair,
+        private_key=keypair[0],
     )
     user = User(
         bid_giver=bid,
