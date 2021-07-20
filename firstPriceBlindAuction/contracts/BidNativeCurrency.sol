@@ -7,7 +7,7 @@ pragma AbiHeader pubkey;
 import "Interfaces.sol";
 import "GiverNativeCurrency.sol";
 
-contract Bid is IGiver {
+contract Bid is IGiver, IBackTransferable, IBid {
     uint public startTime;
     uint public biddingDuration;
     uint public revealingDuration;
@@ -94,14 +94,15 @@ contract Bid is IGiver {
     }
 
     function reveal(
-        uint128 amount_,
-        uint256 secret_
-    ) public {
+        TvmCell data
+    ) override external {
         require(msg.value == 0, 104);
         require(secret == 0, 103);
         require(tvm.pubkey() == msg.pubkey(), 102);
     
         tvm.accept();
+
+        (uint128 amount_, uint256 secret_) = data.toSlice().decode(uint128, uint256);
 
         TvmBuilder builder;
         builder.store(

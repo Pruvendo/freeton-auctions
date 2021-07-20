@@ -4,7 +4,7 @@ pragma AbiHeader expire;
 pragma AbiHeader time;
 pragma AbiHeader pubkey;
 
-contract HashCalc {
+contract __HashCalc {
     function calc(uint128 amount, uint256 secret) public pure returns (uint256) {
         tvm.accept();
         TvmBuilder builder;

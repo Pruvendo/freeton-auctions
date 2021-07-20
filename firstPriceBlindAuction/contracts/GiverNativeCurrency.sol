@@ -6,7 +6,7 @@ pragma AbiHeader pubkey;
 
 import "Interfaces.sol";
 
-contract Giver is IGiver {
+contract Giver is IGiver, IBackTransferable {
     uint public startTime;
     uint public biddingDuration;
     uint public revealingDuration;
@@ -21,6 +21,7 @@ contract Giver is IGiver {
         address root_
     ) public {
         require(tvm.pubkey() != 0, 101);
+        require(tvm.pubkey() == msg.pubkey(), 102);
 
         startTime = startTime_;
         biddingDuration = biddingDuration_;

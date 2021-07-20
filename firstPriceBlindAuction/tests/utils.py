@@ -1,5 +1,4 @@
 import logging
-import random
 
 import tonos_ts4.ts4 as ts4
 
@@ -8,7 +7,12 @@ from dataclasses import dataclass
 
 LOGGER = logging.getLogger(__name__)
 HASH_CALCULATOR = ts4.BaseContract(
-    'HashCalc',
+    '__HashCalc',
+    {},
+    balance=10**10,
+)
+ARG_CALCULATOR = ts4.BaseContract(
+    '__NativeCurrencyBidRevealArgCalc',
     {},
     balance=10**10,
 )
@@ -34,9 +38,18 @@ def magic_hash(amount, secret):
         ),
     )
 
+def magic_arg(amount, secret):
+    return ARG_CALCULATOR.call_method(
+        'calc',
+        dict(
+            amount=amount,
+            secret=secret
+        ),
+    )
+
 def dumb_reciever():
     return ts4.BaseContract(
-        'DumbReciever',
+        '__DumbReciever',
         dict(),
         balance=10**9,
         keypair=ts4.make_keypair(),
@@ -98,8 +111,7 @@ def reveal_bid(auction, amount, username, expect_ec=0):
     bid.call_method(
         'reveal',
         dict(
-            amount_=amount,
-            secret_=user.secret,
+            data=magic_arg(amount, user.secret),
         ),
         expect_ec=expect_ec,
         private_key=bid.private_key_

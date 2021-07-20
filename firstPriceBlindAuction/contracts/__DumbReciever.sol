@@ -2,7 +2,7 @@
 pragma ton-solidity >= 0.35.0;
 pragma AbiHeader expire;
 
-contract DumbReciever {
+contract __DumbReciever {
 
     constructor() public {
         tvm.accept();

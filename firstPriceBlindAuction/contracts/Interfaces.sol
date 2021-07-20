@@ -70,7 +70,12 @@ interface IRoot {
 interface IGiver {
     // this method has to be allowed for the root contract only
     function transferTo(address destination) external;
+}
 
+interface IBackTransferable {
     function transferRemainsTo(address destination) external;
 }
 
+interface IBid {
+    function reveal(TvmCell data) external;
+}
