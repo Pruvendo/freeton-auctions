@@ -10,16 +10,18 @@ interface IAuction {
     // (and revealBid check's Bid contract's code)
     // Here's the formal difference between Bid and Giver
     function revealBid(
-        uint256 secret_,
         uint128 amount_,
+        
+        uint256 secret_,
         uint startTime_,
         uint biddingDuration_,
         uint revealingDuration_,
         uint transferDuration_,
+        uint256 amountHash_,
+        
         address root_,
         address auction_,
-        address lotReciever_,
-        uint256 amountHash_
+        address lotReciever_
     ) external;
 
     function getUpdateableInfo() external view returns(

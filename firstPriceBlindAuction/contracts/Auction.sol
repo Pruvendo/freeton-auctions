@@ -7,11 +7,6 @@ pragma AbiHeader pubkey;
 import "Interfaces.sol";
 import "BidNativeCurrency.sol";
 
-struct BidData {
-    address bidGiver;
-    address lotReciever;
-    uint128 amount;
-}
 
 contract Auction is IAuction {
 
@@ -40,8 +35,9 @@ contract Auction is IAuction {
     |                                                                      |
     \---------------------------------------------------------------------*/
 
-    BidData public winner;
-    bool public ended;
+    address bidGiver;
+    address lotReciever;
+    uint128 winnersPrice;
 
     /*---------------------------------------------------------------------\
     |                                                                      |
@@ -66,7 +62,6 @@ contract Auction is IAuction {
         require(tvm.pubkey() != 0, 101);
         require(msg.sender == root_, 102);
         
-        ended = false;
         a_id = a_id_;
         startTime = startTime_;
         biddingDuration = biddingDuration_;
@@ -79,16 +74,18 @@ contract Auction is IAuction {
     }
 
     function revealBid(
-        uint256 secret_,
         uint128 amount_,
+    
+        uint256 secret_,
         uint startTime_,
         uint biddingDuration_,
         uint revealingDuration_,
         uint transferDuration_,
+        uint256 amountHash_,
+        
         address root_,
         address auction_,
-        address lotReciever_,
-        uint256 amountHash_
+        address lotReciever_
     ) override external {
 
         require(startTime_ == startTime, 777);
@@ -103,23 +100,19 @@ contract Auction is IAuction {
             msg.pubkey()
         ), 777);
     
-        if (winner.bidGiver.isNone() || winner.amount < amount_) {
-            winner = BidData({
-                bidGiver: msg.sender,
-                lotReciever: lotReciever_, //TODO: data???
-                amount: amount_
-            });
+        if (bidGiver.isNone() || winnersPrice < amount_) {
+            bidGiver = msg.sender;
+            lotReciever = lotReciever_;
+            winnersPrice = amount_;
         }
     }
 
     function end() override public {
-        require(!ended, 102);
-        require(winner.lotReciever != address(0));
+        require(lotReciever != address(0));
+        // TODO tick-tok
         require(now >= (startTime + biddingDuration + revealingDuration), 103);
         tvm.accept();
         
-        ended = true;
-
         TvmBuilder builder;
         builder.store(
             a_id
@@ -127,12 +120,14 @@ contract Auction is IAuction {
         TvmCell data = builder.toCell();
         
         IRoot(root).setWinner({
-            bidGiver: winner.bidGiver,
+            bidGiver: bidGiver,
             lotGiver: lotGiver,
             bidReciever: bidReciever,
-            lotReciever: winner.lotReciever,
+            lotReciever: lotReciever,
             data: data
         });
+
+        selfdestruct(root);
     }
 
     function getUpdateableInfo() override public view returns(
@@ -142,10 +137,10 @@ contract Auction is IAuction {
         bool
     ) {
         return (
-            winner.bidGiver,
-            winner.lotReciever,
-            winner.amount,
-            ended
+            bidGiver,
+            lotReciever,
+            winnersPrice,
+            false
         );
     }
 
@@ -173,12 +168,12 @@ contract Auction is IAuction {
         lotGiver_ = lotGiver;
         bidReciever_ = bidReciever;
 
-        bidGiver_ = winner.bidGiver;
-        lotReciever_ = winner.lotReciever;
-        amount_ = winner.amount;
+        bidGiver_ = bidGiver;
+        lotReciever_ = lotReciever;
+        amount_ = winnersPrice;
 
         root_ = root;
-        ended_ = ended;
+        ended_ = false;
     }
 
     function addressFitsCode(

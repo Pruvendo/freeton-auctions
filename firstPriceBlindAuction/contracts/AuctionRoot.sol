@@ -9,11 +9,15 @@ import "Interfaces.sol";
 
 contract AuctionRoot is IRoot {
 
-    uint public number_of_auctions;
+    uint public numberOfAuctions;
+    uint public numberOfActiveAuctions;
 
     TvmCell public auctionCode;
     TvmCell public lotGiverCode;
     TvmCell public bidGiverCode;
+
+    uint128 DEPLOY_AUCTION_COST;
+    uint128 END_AUCTION_COST;
 
     constructor(
         TvmCell auctionCode_,
@@ -28,6 +32,9 @@ contract AuctionRoot is IRoot {
         auctionCode = auctionCode_;
         lotGiverCode = lotGiverCode_;
         bidGiverCode = bidGiverCode_;
+
+        DEPLOY_AUCTION_COST = 3 ton;
+        END_AUCTION_COST = 1 ton;
     }
 
     function startAuctionScenario(
@@ -39,6 +46,7 @@ contract AuctionRoot is IRoot {
         uint transferDuration
     ) override external returns (address auctionAddress) {
         require(msg.pubkey() == tvm.pubkey(), 102);
+        require(address(this).balance > END_AUCTION_COST * (numberOfActiveAuctions + 1) + DEPLOY_AUCTION_COST, 104);
         require(startTime > now, 103);
         require(biddingDuration > 0, 103);
         require(revealingDuration > 0, 103);
@@ -47,10 +55,10 @@ contract AuctionRoot is IRoot {
 
         auctionAddress = new Auction {
             code: auctionCode,
-            value: 10 ton,
+            value: 2 ton,
             pubkey: tvm.pubkey()
         }({
-                a_id_: number_of_auctions,
+                a_id_: numberOfAuctions,
 
                 startTime_: startTime,
                 biddingDuration_: biddingDuration,
@@ -64,7 +72,8 @@ contract AuctionRoot is IRoot {
                 root_: address(this)
             });
 
-        number_of_auctions += 1;
+        numberOfAuctions += 1;
+        numberOfActiveAuctions += 1;
         return auctionAddress;
     }
 
@@ -81,6 +90,7 @@ contract AuctionRoot is IRoot {
         // transfer money <-> prize
         IGiver(bidGiver).transferTo(bidReciever);
         IGiver(lotGiver).transferTo(lotReciever);
+        numberOfActiveAuctions -= 1;
     }
 
     function addressFitsCode(

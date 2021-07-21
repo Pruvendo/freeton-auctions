@@ -21,6 +21,7 @@ contract Bid is IGiver, IBackTransferable, IBid {
     uint256 public secret;
     uint128 public amount;
 
+    // TODO delete me
     TvmCell public bidGiverCode;
 
     constructor(
@@ -99,8 +100,6 @@ contract Bid is IGiver, IBackTransferable, IBid {
         require(msg.value == 0, 104);
         require(secret == 0, 103);
         require(tvm.pubkey() == msg.pubkey(), 102);
-    
-        tvm.accept();
 
         (uint128 amount_, uint256 secret_) = data.toSlice().decode(uint128, uint256);
 
@@ -115,20 +114,24 @@ contract Bid is IGiver, IBackTransferable, IBid {
 
         require(address(this).balance >= amount + 2);
 
+        tvm.accept();
+
         amount = amount_;
         secret = secret_;
 
         IAuction(auction).revealBid{value: 1 ton}({
-            secret_: secret,
             amount_: amount,
+
+            secret_: secret,
             startTime_: startTime,
             biddingDuration_: biddingDuration,
             revealingDuration_: revealingDuration,
             transferDuration_: transferDuration,
+            amountHash_: amountHash,
+
             root_: root,
             auction_: auction,
-            lotReciever_: lotReciever,
-            amountHash_: amountHash
+            lotReciever_: lotReciever
         });
     }
 
