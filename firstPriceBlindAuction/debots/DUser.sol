@@ -65,11 +65,11 @@ contract AuctionUserDebot is Debot {
     }
 
     function revealBid(uint32 index) public {
-        
+
     }
 
     function takeBidBack(uint32 index) public {
-        
+
     }
 
     /*---------------------------------------------------------------------\
@@ -196,13 +196,12 @@ contract AuctionUserDebot is Debot {
         TvmBuilder builder;
         builder.store(
             tvm.hash(phrase),
-            "Let me take you down, cos I'm going to Strawberry Fields Nothing is real and nothing to get hung about Strawberry Fields forever",
             __amount
         );
         __amountHash = tvm.hash(builder.toCell());
 
         Terminal.print(0, "Now you're ready to deploy your bid.");
-        
+
         TvmCell stateInit = tvm.buildStateInit(bidGiverCode, builder.toCell());
         TvmCell stateInitWithKey = tvm.insertPubkey(stateInit, __ownerPubkey);
         address addr = address(tvm.hash(stateInitWithKey));
@@ -235,7 +234,7 @@ contract AuctionUserDebot is Debot {
     |                            TECHNICAL                                 |
     |                                                                      |
     \---------------------------------------------------------------------*/
-    
+
     bytes m_icon;
 
     function setIcon(bytes icon) public {

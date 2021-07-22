@@ -12,7 +12,7 @@ contract Bid is IGiver, IBackTransferable, IBid {
     uint public biddingDuration;
     uint public revealingDuration;
     uint public transferDuration;
-    
+
     address public root;
     address public auction;
     address public lotReciever;
@@ -29,7 +29,7 @@ contract Bid is IGiver, IBackTransferable, IBid {
         uint biddingDuration_,
         uint revealingDuration_,
         uint transferDuration_,
-        
+
         address root_,
         address auction_,
         address lotReciever_,
@@ -67,7 +67,7 @@ contract Bid is IGiver, IBackTransferable, IBid {
             varInit: {},
             pubkey: pubkey
         });
-    
+
         address addr = address(tvm.hash(stateInit));
         return addr == sender;
     }
@@ -100,19 +100,20 @@ contract Bid is IGiver, IBackTransferable, IBid {
         require(msg.value == 0, 104);
         require(secret == 0, 103);
         require(tvm.pubkey() == msg.pubkey(), 102);
+        require(now >= startTime + biddingDuration, 103);
+        require(now < startTime + biddingDuration + revealingDuration, 103);
 
         (uint128 amount_, uint256 secret_) = data.toSlice().decode(uint128, uint256);
 
         TvmBuilder builder;
         builder.store(
             secret_,
-            "Let me take you down, cos I'm going to Strawberry Fields Nothing is real and nothing to get hung about Strawberry Fields forever",
             amount_
         );
         uint256 hash_ = tvm.hash(builder.toCell());
         require(amountHash == hash_, 201);
 
-        require(address(this).balance >= amount + 2);
+        require(address(this).balance >= amount + 1);
 
         tvm.accept();
 
