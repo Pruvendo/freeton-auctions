@@ -5,20 +5,21 @@ pragma AbiHeader time;
 
 interface IAuction {
     function end() external;
-    
+
     // revealBid has to be called by Bid instance only
     // (and revealBid check's Bid contract's code)
     // Here's the formal difference between Bid and Giver
     function revealBid(
         uint128 amount_,
-        
+
+        // auction-type specific data
         uint256 secret_,
+        uint256 amountHash_,
         uint startTime_,
         uint biddingDuration_,
         uint revealingDuration_,
         uint transferDuration_,
-        uint256 amountHash_,
-        
+
         address root_,
         address auction_,
         address lotReciever_
@@ -79,5 +80,5 @@ interface IBackTransferable {
 }
 
 interface IBid {
-    function reveal(TvmCell data) external;
+    function reveal(TvmCell bidData, TvmCell auctionData) external;
 }

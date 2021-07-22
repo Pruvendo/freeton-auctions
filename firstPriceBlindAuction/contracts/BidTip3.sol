@@ -5,11 +5,10 @@ pragma AbiHeader time;
 pragma AbiHeader pubkey;
 
 import "Interfaces.sol";
-import "GiverNativeCurrency.sol";
 import "AbstractFirstPriceBid.sol";
-import "AbstractNativeCurrencyBid.sol";
+import "AbstractTip3Bid.sol";
 
-contract Bid is IGiver, IBackTransferable, IBid, ANCBid, AFPBid {
+contract Bid is IGiver, IBid, AT3Bid, AFPBid {
 
     constructor(TvmCell auctionData, TvmCell bidData) public {
         require(tvm.pubkey() != 0, 101);
@@ -18,14 +17,6 @@ contract Bid is IGiver, IBackTransferable, IBid, ANCBid, AFPBid {
         require(correctConstructorsAuctionData(), 103);
         require(correctConstructorsBidData(), 103);
         tvm.accept();
-    }
-
-    function transferRemainsTo(address destination) override external {
-        require(tvm.pubkey() == msg.pubkey(), 102);
-        require(canTransferRemains(), 102);
-        tvm.accept();
-
-        __transferRemains(destination);
     }
 
     function transferTo(address destination) override external {

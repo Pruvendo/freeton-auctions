@@ -16,6 +16,11 @@ ARG_CALCULATOR = ts4.BaseContract(
     {},
     balance=10**10,
 )
+CONSTRUCTOR_ARG_CALCULATOR = ts4.BaseContract(
+    '__NativeCurrencyBidConstructorArgCalc',
+    {},
+    balance=10**10,
+)
 ts4.dispatch_messages()
 
 @dataclass
@@ -46,6 +51,19 @@ def magic_arg(amount, secret):
             secret=secret
         ),
     )
+
+def magic_constructor_arg(
+    # *,
+    **kwargs,
+):
+    auc_data, bid_data = CONSTRUCTOR_ARG_CALCULATOR.call_method(
+        'calc',
+        kwargs,
+    )
+    return {
+        'auctionData': auc_data,
+        'bidData': bid_data,
+    }
 
 def dumb_reciever():
     return ts4.BaseContract(
@@ -81,7 +99,7 @@ def make_bid(
     )
     bid.call_method(
         'constructor',
-        dict(
+        magic_constructor_arg(
             startTime_=start_time,
             biddingDuration_=bidding_duration,
             revealingDuration_=revealing_duration,
@@ -90,7 +108,6 @@ def make_bid(
             auction_=auction_address,
             lotReciever_=lot_reciever.address,
             amountHash_=amount_hash,
-            bidGiverCode_=ts4.load_code_cell('BidNativeCurrency')
         ),
         private_key=keypair[0],
     )
@@ -111,7 +128,8 @@ def reveal_bid(auction, amount, username, expect_ec=0):
     bid.call_method(
         'reveal',
         dict(
-            data=magic_arg(amount, user.secret),
+            bidData='',
+            auctionData=magic_arg(amount, user.secret),
         ),
         expect_ec=expect_ec,
         private_key=bid.private_key_
@@ -202,7 +220,7 @@ def make_lot_giver(
         transfer_duration,
         root_address,
     ) -> ts4.BaseContract:
-    
+
     return ts4.BaseContract(
         'GiverNativeCurrency',
         dict(
