@@ -61,7 +61,7 @@ contract Auction is IAuction {
     ) public {
         require(tvm.pubkey() != 0, 101);
         require(msg.sender == root_, 102);
-        
+
         a_id = a_id_;
         startTime = startTime_;
         biddingDuration = biddingDuration_;
@@ -75,14 +75,14 @@ contract Auction is IAuction {
 
     function revealBid(
         uint128 amount_,
-    
+
         uint256 secret_,
+        uint256 amountHash_,
         uint startTime_,
         uint biddingDuration_,
         uint revealingDuration_,
         uint transferDuration_,
-        uint256 amountHash_,
-        
+
         address root_,
         address auction_,
         address lotReciever_
@@ -99,7 +99,7 @@ contract Auction is IAuction {
             msg.sender,
             msg.pubkey()
         ), 777);
-    
+
         if (bidGiver.isNone() || winnersPrice < amount_) {
             bidGiver = msg.sender;
             lotReciever = lotReciever_;
@@ -112,13 +112,13 @@ contract Auction is IAuction {
         // TODO tick-tok
         require(now >= (startTime + biddingDuration + revealingDuration), 103);
         tvm.accept();
-        
+
         TvmBuilder builder;
         builder.store(
             a_id
         );
         TvmCell data = builder.toCell();
-        
+
         IRoot(root).setWinner({
             bidGiver: bidGiver,
             lotGiver: lotGiver,
@@ -188,7 +188,7 @@ contract Auction is IAuction {
             varInit: {},
             pubkey: pubkey
         });
-    
+
         address addr = address(tvm.hash(stateInit));
         return addr == sender;
     }
