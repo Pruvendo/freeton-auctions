@@ -11,6 +11,7 @@ contract Giver is IGiver, IBackTransferable {
     uint public biddingDuration;
     uint public revealingDuration;
     uint public transferDuration;
+    //TODO один лот может быть в нескольких аукционах, починить!!!
     address public root;
 
     constructor(
