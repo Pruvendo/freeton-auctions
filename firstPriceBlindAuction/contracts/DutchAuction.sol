@@ -34,7 +34,6 @@ contract Auction is IAuction {
     |                                                                      |
     \---------------------------------------------------------------------*/
 
-    bool public ended;
     address public bidGiver;
     address public lotReciever;
     uint128 public winnersPrice;
@@ -61,7 +60,6 @@ contract Auction is IAuction {
         require(tvm.pubkey() != 0, 101);
         require(msg.sender == root_, 102);
 
-        ended = false;
         a_id = a_id_;
         startTime = startTime_;
         startPrice = startPrice_;
@@ -86,7 +84,6 @@ contract Auction is IAuction {
             uint128 startPrice_,
             uint128 priceStep_
         ) = auctionData.toSlice().decode(uint, uint128, uint128);
-        require(!ended);
         require(now >= startTime, 103);
         require((now - startTime) * priceStep < startPrice, 103);
         require(amount_ >= startPrice - (now - startTime) * priceStep, 103);
@@ -105,7 +102,6 @@ contract Auction is IAuction {
     }
 
     function __end() private inline {
-        ended = true;
 
         TvmBuilder builder;
         builder.store(
