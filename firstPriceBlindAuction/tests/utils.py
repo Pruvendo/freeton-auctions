@@ -92,7 +92,7 @@ def make_bid(
     amount_hash = magic_hash(amount, secret)
     keypair = ts4.make_keypair()
     bid = ts4.BaseContract(
-        'BidNativeCurrency',
+        'BidNativeCurrencyFirstPrice',
         None,
         balance=value,
         keypair=keypair,
@@ -146,7 +146,7 @@ def reveal_bid(auction, amount, username, expect_ec=0):
     assert user.lot_reciever.address == bid.call_getter('lotReciever')
     assert magic_hash(amount, user.secret) == bid.call_getter('amountHash')
     assert (bid.private_key_, bid.public_key_) == user.keypair
-    assert auction.call_getter('bidGiverCode') == ts4.load_code_cell('BidNativeCurrency')
+    assert auction.call_getter('bidGiverCode') == ts4.load_code_cell('BidNativeCurrencyFirstPrice')
     ts4.dispatch_messages()
 
 

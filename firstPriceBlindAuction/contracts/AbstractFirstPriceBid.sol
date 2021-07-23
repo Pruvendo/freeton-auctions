@@ -68,15 +68,22 @@ abstract contract AFPBid is AHasAmount {
     }
 
     function revealToAuction() internal inline {
+        TvmBuilder builder1;
+        TvmBuilder builder2;
+        TvmBuilder builder3;
+        builder1.store(secret, amountHash, startTime);
+        builder2.store(biddingDuration, revealingDuration, transferDuration);
+        builder3.store(builder1.toCell(), builder2.toCell());
         IAuction(auction).revealBid{value: 1 ton}({
             amount_: amount,
 
-            secret_: secret,
-            amountHash_: amountHash,
-            startTime_: startTime,
-            biddingDuration_: biddingDuration,
-            revealingDuration_: revealingDuration,
-            transferDuration_: transferDuration,
+            auctionData: builder3.toCell(),
+            // secret_: secret,
+            // amountHash_: amountHash,
+            // startTime_: startTime,
+            // biddingDuration_: biddingDuration,
+            // revealingDuration_: revealingDuration,
+            // transferDuration_: transferDuration,
 
             root_: root,
             auction_: auction,

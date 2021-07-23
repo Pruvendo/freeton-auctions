@@ -19,7 +19,7 @@ def fix_path(pytestconfig):
 def root_contract():
     auction_code = ts4.load_code_cell('Auction')
     giver_code = ts4.load_code_cell('GiverNativeCurrency')
-    bid_code = ts4.load_code_cell('BidNativeCurrency')
+    bid_code = ts4.load_code_cell('BidNativeCurrencyFirstPrice')
     return ts4.BaseContract(
         'AuctionRoot',
         dict(

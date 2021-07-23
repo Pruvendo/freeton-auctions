@@ -13,41 +13,36 @@ interface IAuction {
         uint128 amount_,
 
         // auction-type specific data
-        uint256 secret_,
-        uint256 amountHash_,
-        uint startTime_,
-        uint biddingDuration_,
-        uint revealingDuration_,
-        uint transferDuration_,
+        TvmCell auctionData,
 
         address root_,
         address auction_,
         address lotReciever_
     ) external;
 
-    function getUpdateableInfo() external view returns(
-        address bidGiver,
-        address lotReciever,
-        uint128 amount,
-        bool ended
-    );
+    // function getUpdateableInfo() external view returns(
+    //     address bidGiver,
+    //     address lotReciever,
+    //     uint128 amount,
+    //     bool ended
+    // );
 
-    function getAllInfo() external view returns(
-        uint startTime_,
-        uint biddingDuration_,
-        uint revealingDuration_,
-        uint transferDuration_,
+    // function getAllInfo() external view returns(
+    //     uint startTime_,
+    //     uint biddingDuration_,
+    //     uint revealingDuration_,
+    //     uint transferDuration_,
 
-        address lotGiver_,
-        address bidReciever_,
+    //     address lotGiver_,
+    //     address bidReciever_,
 
-        address bidGiver_,
-        address lotReciever_,
-        uint128 amount_,
+    //     address bidGiver_,
+    //     address lotReciever_,
+    //     uint128 amount_,
 
-        address root_,
-        bool ended_
-    );
+    //     address root_,
+    //     bool ended_
+    // );
 }
 
 interface IRoot {

@@ -5,7 +5,7 @@ pragma AbiHeader time;
 pragma AbiHeader pubkey;
 
 import "Interfaces.sol";
-import "BidNativeCurrencyFirstPrice.sol";
+import "BidNativeCurrencyDutch.sol";
 
 
 contract Auction is IAuction {
@@ -19,9 +19,8 @@ contract Auction is IAuction {
     uint static public a_id;
 
     uint public startTime;
-    uint public biddingDuration;
-    uint public revealingDuration;
-    uint public transferDuration;
+    uint128 startPrice;
+    uint128 priceStep;
 
     address public lotGiver;
     address public bidReciever;
@@ -35,9 +34,10 @@ contract Auction is IAuction {
     |                                                                      |
     \---------------------------------------------------------------------*/
 
-    address bidGiver;
-    address lotReciever;
-    uint128 winnersPrice;
+    bool public ended;
+    address public bidGiver;
+    address public lotReciever;
+    uint128 public winnersPrice;
 
     /*---------------------------------------------------------------------\
     |                                                                      |
@@ -49,9 +49,8 @@ contract Auction is IAuction {
         uint a_id_,
 
         uint startTime_,
-        uint biddingDuration_,
-        uint revealingDuration_,
-        uint transferDuration_,
+        uint128 startPrice_,
+        uint128 priceStep_,
 
         address lotGiver_,
         address bidReciever_,
@@ -62,11 +61,11 @@ contract Auction is IAuction {
         require(tvm.pubkey() != 0, 101);
         require(msg.sender == root_, 102);
 
+        ended = false;
         a_id = a_id_;
         startTime = startTime_;
-        biddingDuration = biddingDuration_;
-        revealingDuration = revealingDuration_;
-        transferDuration = transferDuration_;
+        startPrice = startPrice_;
+        priceStep = priceStep_;
         lotGiver = lotGiver_;
         bidReciever = bidReciever_;
         bidGiverCode = bidGiverCode_;
@@ -77,54 +76,36 @@ contract Auction is IAuction {
         uint128 amount_,
 
         TvmCell auctionData,
-        // uint256 secret_,
-        // uint256 amountHash_,
-        // uint startTime_,
-        // uint biddingDuration_,
-        // uint revealingDuration_,
-        // uint transferDuration_,
 
         address root_,
         address auction_,
         address lotReciever_
     ) override external {
-
-        (TvmCell cell1, TvmCell cell2) = auctionData.toSlice().decode(TvmCell, TvmCell);
         (
-            uint256 secret_,
-            uint256 amountHash_,
-            uint startTime_
-        ) = cell1.toSlice().decode(uint256, uint256, uint);
-        (
-            uint biddingDuration_,
-            uint revealingDuration_,
-            uint transferDuration_
-        ) = cell2.toSlice().decode(uint, uint, uint);
-
-        require(startTime_ == startTime, 777);
-        require(biddingDuration_ == biddingDuration, 777);
-        require(revealingDuration_ == revealingDuration, 777);
-        require(transferDuration_ == transferDuration, 777);
-        require(root_ == root, 777);
-        require(auction_ == address(this), 777);
+            uint startTime_,
+            uint128 startPrice_,
+            uint128 priceStep_
+        ) = auctionData.toSlice().decode(uint, uint128, uint128);
+        require(!ended);
+        require(now >= startTime, 103);
+        require((now - startTime) * priceStep < startPrice, 103);
+        require(amount_ >= startPrice - (now - startTime) * priceStep, 103);
+        require(startTime_ == startTime, 102);
+        require(startPrice_ == startPrice, 102);
+        require(priceStep_ == priceStep, 102);
+        require(root_ == root, 102);
+        require(this == auction_);
 
         require(addressFitsCode(
             msg.sender,
             msg.pubkey()
-        ), 777);
+        ), 102);
 
-        if (bidGiver.isNone() || winnersPrice < amount_) {
-            bidGiver = msg.sender;
-            lotReciever = lotReciever_;
-            winnersPrice = amount_;
-        }
+        __end();
     }
 
-    function end() override public {
-        require(lotReciever != address(0));
-        // TODO tick-tok
-        require(now >= (startTime + biddingDuration + revealingDuration), 103);
-        tvm.accept();
+    function __end() private inline {
+        ended = true;
 
         TvmBuilder builder;
         builder.store(
@@ -139,54 +120,12 @@ contract Auction is IAuction {
             lotReciever: lotReciever,
             data: data
         });
+    }
 
+    function end() override external {
+        require(now >= startTime, 103);
+        require((now - startTime) * priceStep > startPrice, 103);
         selfdestruct(root);
-    }
-
-    function getUpdateableInfo() public view returns(
-        address,
-        address,
-        uint128,
-        bool
-    ) {
-        return (
-            bidGiver,
-            lotReciever,
-            winnersPrice,
-            false
-        );
-    }
-
-    function getAllInfo() public view returns(
-        uint startTime_,
-        uint biddingDuration_,
-        uint revealingDuration_,
-        uint transferDuration_,
-
-        address lotGiver_,
-        address bidReciever_,
-
-        address bidGiver_,
-        address lotReciever_,
-        uint128 amount_,
-
-        address root_,
-        bool ended_
-    ) {
-        startTime_ = startTime;
-        biddingDuration_ = biddingDuration;
-        revealingDuration_ = revealingDuration;
-        transferDuration_ = transferDuration;
-
-        lotGiver_ = lotGiver;
-        bidReciever_ = bidReciever;
-
-        bidGiver_ = bidGiver;
-        lotReciever_ = lotReciever;
-        amount_ = winnersPrice;
-
-        root_ = root;
-        ended_ = false;
     }
 
     function addressFitsCode(
