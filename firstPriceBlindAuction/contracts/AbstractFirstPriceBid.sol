@@ -5,9 +5,9 @@ pragma AbiHeader time;
 pragma AbiHeader pubkey;
 
 import "Interfaces.sol";
-import "AbstractHasAmount.sol";
+import "AbstractHasBalance.sol";
 
-abstract contract AFPBid is AHasAmount {
+abstract contract AFPBid is AHasBalance {
 
     // auction specific
     uint public startTime;

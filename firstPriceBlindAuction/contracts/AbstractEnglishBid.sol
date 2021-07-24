@@ -5,9 +5,9 @@ pragma AbiHeader time;
 pragma AbiHeader pubkey;
 
 import "Interfaces.sol";
-import "AbstractHasAmount.sol";
+import "AbstractHasBalance.sol";
 
-abstract contract AEnglishBid is AHasAmount {
+abstract contract AEnglishBid is AHasBalance {
 
     uint public startTime;
     uint public biddingDuration;
@@ -41,9 +41,7 @@ abstract contract AEnglishBid is AHasAmount {
             && (now < startTime + biddingDuration);
     }
 
-    function setUpRevealAuctionData(TvmCell data) internal inline {
-        amount = address(this).balance - 2 ton;
-    }
+    function setUpRevealAuctionData(TvmCell data) internal inline {}
 
     function revealToAuction() internal inline {
         TvmBuilder builder;
