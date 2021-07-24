@@ -35,9 +35,9 @@ contract Auction is IAuction {
     |                                                                      |
     \---------------------------------------------------------------------*/
 
-    address bidGiver;
-    address lotReciever;
-    uint128 winnersPrice;
+    address public bidGiver;
+    address public lotReciever;
+    uint128 public winnersPrice;
 
     /*---------------------------------------------------------------------\
     |                                                                      |
