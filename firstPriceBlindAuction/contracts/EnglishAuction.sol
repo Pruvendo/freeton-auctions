@@ -5,7 +5,7 @@ pragma AbiHeader time;
 pragma AbiHeader pubkey;
 
 import "Interfaces.sol";
-import "BidNativeCurrencyFirstPrice.sol";
+import "BidNativeCurrencyEnglish.sol";
 
 
 contract Auction is IAuction {
