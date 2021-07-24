@@ -17,7 +17,7 @@ def fix_path(pytestconfig):
 
 @fixture(scope='session')
 def root_contract():
-    auction_code = ts4.load_code_cell('Auction')
+    auction_code = ts4.load_code_cell('FirstPriceAuction')
     giver_code = ts4.load_code_cell('GiverNativeCurrency')
     bid_code = ts4.load_code_cell('BidNativeCurrencyFirstPrice')
     return ts4.BaseContract(

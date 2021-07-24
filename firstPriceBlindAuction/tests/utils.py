@@ -202,7 +202,7 @@ def make_auction_contract(
     ts4.Address.ensure_address(auction_address)
     ts4.dispatch_messages()
     res = ts4.BaseContract(
-        'Auction',
+        'FirstPriceAuction',
         ctor_params=None,
         address=auction_address,
     )

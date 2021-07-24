@@ -22,6 +22,8 @@ abstract contract AFPBid is AHasAmount {
     uint256 public amountHash;
     uint256 public secret;
 
+    bool public revealed;
+
     function setUpAuctionSpecificDataConstructor(TvmCell auctionData) internal inline {
 
         (TvmCell cell1, TvmCell cell2, TvmCell cell3)= auctionData.toSlice().decode(TvmCell, TvmCell, TvmCell);
@@ -58,9 +60,12 @@ abstract contract AFPBid is AHasAmount {
     }
 
     function canRevealAuc() internal inline returns (bool) {
-        return (secret == 0)
-            || (now >= startTime + biddingDuration)
-            || (now < startTime + biddingDuration + revealingDuration);
+        if (revealed) {
+            return false;
+        }
+        revealed = true;
+        return (now >= startTime + biddingDuration)
+            && (now < startTime + biddingDuration + revealingDuration);
     }
 
     function setUpRevealAuctionData(TvmCell data) internal inline {
