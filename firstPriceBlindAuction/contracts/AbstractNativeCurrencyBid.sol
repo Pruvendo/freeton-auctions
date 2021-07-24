@@ -5,9 +5,9 @@ pragma AbiHeader time;
 pragma AbiHeader pubkey;
 
 import "Interfaces.sol";
-import "AbstractHasAmount.sol";
+import "AbstractHasBalance.sol";
 
-abstract contract ANCBid is AHasAmount {
+abstract contract ANCBid is AHasBalance {
 
     function correctConstructorsBidData()
     internal inline returns (bool) {

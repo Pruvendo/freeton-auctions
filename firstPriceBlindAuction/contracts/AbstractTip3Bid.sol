@@ -5,10 +5,10 @@ pragma AbiHeader time;
 pragma AbiHeader pubkey;
 
 import "Interfaces.sol";
-import "AbstractHasAmount.sol";
+import "AbstractHasBalance.sol";
 import "Tip3Interfaces.sol";
 
-abstract contract AT3Bid is AHasAmount, ITip3Holder {
+abstract contract AT3Bid is AHasBalance, ITip3Holder {
 
     uint128 public balance;
     address public wallet;

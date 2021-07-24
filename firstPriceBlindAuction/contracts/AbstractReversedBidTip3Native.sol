@@ -59,6 +59,10 @@ abstract contract AReversedTip3NativeBid is AHasBalance, ITip3Holder {
         moneyDestination.transfer(amount, false);
     }
 
+    function __transferRemains(address destination) internal inline {
+        selfdestruct(destination);
+    }
+
     function canRevealBid() internal inline returns (bool) {
         return (address(this).balance - 2 ton >= amount) && (balance >= minBalance);
     }
