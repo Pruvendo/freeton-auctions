@@ -11,7 +11,7 @@ trap "
 
 set -e
 cd contracts/
-tondev sol compile Auction.sol;
+tondev sol compile FirstPriceAuction.sol;
 tondev sol compile AuctionRoot.sol;
 tondev sol compile BidNativeCurrencyFirstPrice.sol;
 tondev sol compile GiverNativeCurrency.sol;

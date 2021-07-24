@@ -28,7 +28,7 @@ function nice_echo() {
 
 # nice_echo "2. Compile contracts"
 # cd ./contracts
-# tondev sol compile Auction.sol > /dev/null
+# tondev sol compile FirstPriceAuction.sol > /dev/null
 # temp=$(../static/tvm_linker decode --tvc Auction.tvc)
 # auc_code=$(echo $temp | grep -oP 'code: \K\S+')
 

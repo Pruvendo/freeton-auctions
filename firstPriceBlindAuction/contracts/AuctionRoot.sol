@@ -4,7 +4,7 @@ pragma AbiHeader expire;
 pragma AbiHeader time;
 pragma AbiHeader pubkey;
 
-import "Auction.sol";
+import "FirstPriceAuction.sol";
 import "Interfaces.sol";
 
 contract AuctionRoot is IRoot {
@@ -101,7 +101,7 @@ contract AuctionRoot is IRoot {
 
         TvmCell stateInit = tvm.buildStateInit(code, data);
         TvmCell stateInitWithKey = tvm.insertPubkey(stateInit, tvm.pubkey());
-    
+
         address addr = address(tvm.hash(stateInitWithKey));
         return addr == sender;
     }
