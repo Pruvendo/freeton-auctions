@@ -5,12 +5,11 @@ pragma AbiHeader time;
 pragma AbiHeader pubkey;
 
 import "Interfaces.sol";
-import "AbstractHasAmount.sol";
+import "AbstractHasBalance.sol";
 import "Tip3Interfaces.sol";
 
-abstract contract AT3Bid is AHasAmount, ITip3Holder {
+abstract contract AReversedTip3NativeBid is AHasBalance, ITip3Holder {
 
-    uint128 public balance;
     address public wallet;
 
     function correctConstructorsBidData()
@@ -20,7 +19,7 @@ abstract contract AT3Bid is AHasAmount, ITip3Holder {
 
     function setUpBidSpecificDataConstructor(TvmCell bidData) internal inline {
         balance = 0;
-        (wallet) = bidData.toSlice().decode(address);
+        (minBalance, wallet) = bidData.toSlice().decode(uint128, address);
     }
 
     function onTip3LendOwnership(
@@ -32,7 +31,6 @@ abstract contract AT3Bid is AHasAmount, ITip3Holder {
         address answer_addr
     ) override external {
         require(verify(wallet_public_key_, owner_addr, payload, answer_addr), 102);
-        // TODO сторонний пользователь может просаживать баланс!!!
         tvm.accept();
         balance += lend_balance;
     }
@@ -49,22 +47,20 @@ abstract contract AT3Bid is AHasAmount, ITip3Holder {
         return true;
     }
 
-    function __transferTo(address destination) internal inline {
+    function __transferTo(address moneyDestination, address resourceDestination) internal inline {
+
         ITip3Wallet(wallet).transfer({
-            dest: destination,
+            dest: resourceDestination,
             tokens: balance,
             return_ownership: true,
-            answer_addr: destination
+            answer_addr: resourceDestination
         });
+
+        moneyDestination.transfer(amount, false);
     }
 
-    function __transferRemains(address destination) internal inline {
-        selfdestruct(destination);
-    }
-
-    function canRevealBid()
-    internal inline returns (bool) {
-        return (address(this).balance >= 2 ton) && (balance >= amount);
+    function canRevealBid() internal inline returns (bool) {
+        return (address(this).balance - 2 ton >= amount) && (balance >= minBalance);
     }
 
     function setUpRevealBidData(TvmCell data) internal inline {}

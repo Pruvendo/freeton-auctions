@@ -17,11 +17,7 @@ abstract contract ANCBid is AHasAmount {
     function setUpBidSpecificDataConstructor(TvmCell bidData) internal inline {}
 
     function __transferRemains(address destination) internal inline {
-        destination.transfer({
-            value: 0 ton,
-            bounce: false,
-            flag: 128
-        });
+        selfdestruct(destination);
     }
 
     function __transferTo(address destination) internal inline {

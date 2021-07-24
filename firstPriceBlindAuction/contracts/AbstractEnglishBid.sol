@@ -41,9 +41,7 @@ abstract contract AEnglishBid is AHasAmount {
             && (now < startTime + biddingDuration);
     }
 
-    function setUpRevealAuctionData(TvmCell data) internal inline {
-        amount = address(this).balance - 2 ton;
-    }
+    function setUpRevealAuctionData(TvmCell data) internal inline {}
 
     function revealToAuction() internal inline {
         TvmBuilder builder;
