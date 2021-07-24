@@ -77,3 +77,9 @@ interface IBackTransferable {
 interface IBid {
     function reveal(TvmCell bidData, TvmCell auctionData) external;
 }
+
+interface IDePool {
+    function addOrdinaryStake(uint64 stake) external;
+    function transferStake(address dest, uint64 amount) external;
+    function withdrawAll() external;
+}
