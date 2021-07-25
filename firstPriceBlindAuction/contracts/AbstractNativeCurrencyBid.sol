@@ -6,8 +6,9 @@ pragma AbiHeader pubkey;
 
 import "Interfaces.sol";
 import "AbstractHasBalance.sol";
+import "Depoolable.sol";
 
-abstract contract ANCBid is AHasBalance {
+abstract contract ANCBid is AHasBalance, Depoolable {
 
     function correctConstructorsBidData()
     internal inline returns (bool) {
