@@ -8,7 +8,7 @@ import "Interfaces.sol";
 import "AbstractDutchBid.sol";
 import "AbstractTip3Bid.sol";
 
-contract Bid is IGiver, IBid, AT3Bid, ADutchBid {
+contract Bid is IBid, AT3Bid, ADutchBid {
 
     constructor(TvmCell auctionData, TvmCell bidData) public {
         require(tvm.pubkey() != 0, 101);

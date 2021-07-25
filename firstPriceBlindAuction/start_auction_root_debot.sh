@@ -32,8 +32,8 @@ tondev sol compile FirstPriceAuction.sol > /dev/null
 temp=$(../static/tvm_linker decode --tvc Auction.tvc)
 auc_code=$(echo $temp | grep -oP 'code: \K\S+')
 
-tondev sol compile AuctionRoot.sol > /dev/null
-temp=$(../static/tvm_linker decode --tvc AuctionRoot.tvc)
+tondev sol compile AuctionRootFirstPrice.sol > /dev/null
+temp=$(../static/tvm_linker decode --tvc AuctionRootFirstPrice.tvc)
 auc_root_code=$(echo $temp | grep -oP 'code: \K\S+')
 
 tondev sol compile BidNativeCurrencyFirstPrice.sol > /dev/null
@@ -49,16 +49,16 @@ nice_echo "3. Generate auc_root_address"
 cd ../debots
 # tonos-cli getkeypair ../keyfile.json "$PHRASE"
 
-tonos-cli genaddr ../contracts/AuctionRoot.tvc ../contracts/AuctionRoot.abi.json \
-    --setkey ../keyfile.json > AuctionRoot.log
+tonos-cli genaddr ../contracts/AuctionRootFirstPrice.tvc ../contracts/AuctionRootFirstPrice.abi.json \
+    --setkey ../keyfile.json > AuctionRootFirstPrice.log
     # --data "{
     #     \"auctionCode\": \"$auc_code\",
     #     \"giverCode\": \"$giver_code\",
     #     \"bidCode\": \"$bid_code\",
     #     \"rootId\": 0
     # }"  \
-    # --genkey ../keyfile.json > AuctionRoot.log
-auc_root_address=$(cat AuctionRoot.log | grep "Raw address:" | cut -d ' ' -f 3)
+    # --genkey ../keyfile.json > AuctionRootFirstPrice.log
+auc_root_address=$(cat AuctionRootFirstPrice.log | grep "Raw address:" | cut -d ' ' -f 3)
 echo "auc_root_address: $auc_root_address"
 
 
@@ -79,9 +79,9 @@ tonos-cli --url http://127.0.0.1/ call $GIVER_ADDRESS \
 
 nice_echo "5. Deploy Root"
 tonos-cli --url $NETWORK \
-    deploy contracts/AuctionRoot.tvc \
+    deploy contracts/AuctionRootFirstPrice.tvc \
     --sign keyfile.json \
-    --abi contracts/AuctionRoot.abi.json \
+    --abi contracts/AuctionRootFirstPrice.abi.json \
     "{
         \"auctionCode_\": \"$auc_code\",
         \"lotGiverCode_\": \"$giver_code\",

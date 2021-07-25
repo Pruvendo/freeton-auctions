@@ -55,14 +55,14 @@ interface IRoot {
         TvmCell data
     ) external;
 
-    function startAuctionScenario(
-        address lotGiver,
-        address bidReciever,
-        uint startTime,
-        uint biddingDuration,
-        uint revealingDuration,
-        uint transferDuration
-    ) external returns (address auctionAddress);
+    // function startAuctionScenario(
+    //     address lotGiver,
+    //     address bidReciever,
+    //     uint startTime,
+    //     uint biddingDuration,
+    //     uint revealingDuration,
+    //     uint transferDuration
+    // ) external returns (address auctionAddress);
 }
 
 interface IGiver {
@@ -81,4 +81,5 @@ interface IBackTransferable {
 
 interface IBid {
     function reveal(TvmCell bidData, TvmCell auctionData) external;
+    function transferTo(address destination) external;
 }

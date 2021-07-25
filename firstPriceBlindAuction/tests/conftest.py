@@ -9,24 +9,8 @@ from pytest import fixture
 LOGGER = logging.getLogger(__name__)
 
 
-@fixture(scope='session')
+@fixture(scope='function')
 def fix_path(pytestconfig):
+    # ts4.reset_all()
     rootpath: pathlib.Path = pytestconfig.rootpath
     ts4.init(rootpath.joinpath('contracts/'), verbose=False)
-
-
-@fixture(scope='session')
-def root_contract():
-    auction_code = ts4.load_code_cell('FirstPriceAuction')
-    giver_code = ts4.load_code_cell('GiverNativeCurrency')
-    bid_code = ts4.load_code_cell('BidNativeCurrencyFirstPrice')
-    return ts4.BaseContract(
-        'AuctionRoot',
-        dict(
-            auctionCode_=auction_code,
-            lotGiverCode_=giver_code,
-            bidGiverCode_=bid_code,
-        ),
-        balance=10 ** 12,
-        keypair=ts4.make_keypair(),
-    )
