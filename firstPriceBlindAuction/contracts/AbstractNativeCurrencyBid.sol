@@ -5,10 +5,10 @@ pragma AbiHeader time;
 pragma AbiHeader pubkey;
 
 import "Interfaces.sol";
-import "AbstractHasAmount.sol";
+import "AbstractHasBalance.sol";
 import "Depoolable.sol";
 
-abstract contract ANCBid is AHasAmount, Depoolable {
+abstract contract ANCBid is AHasBalance, Depoolable {
 
     function correctConstructorsBidData()
     internal inline returns (bool) {
@@ -18,11 +18,7 @@ abstract contract ANCBid is AHasAmount, Depoolable {
     function setUpBidSpecificDataConstructor(TvmCell bidData) internal inline {}
 
     function __transferRemains(address destination) internal inline {
-        destination.transfer({
-            value: 0 ton,
-            bounce: false,
-            flag: 128
-        });
+        selfdestruct(destination);
     }
 
     function __transferTo(address destination) internal inline {

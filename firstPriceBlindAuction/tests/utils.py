@@ -128,7 +128,7 @@ def reveal_bid(auction, amount, username, expect_ec=0):
     bid.call_method(
         'reveal',
         dict(
-            bidData='',
+            bidData=ts4.Cell(''),
             auctionData=magic_arg(amount, user.secret),
         ),
         expect_ec=expect_ec,

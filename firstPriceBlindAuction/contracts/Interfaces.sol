@@ -70,6 +70,11 @@ interface IGiver {
     function transferTo(address destination) external;
 }
 
+interface IDoubleGiver {
+    // this method has to be allowed for the root contract only
+    function transferTo(address moneyDestination, address resourceDestination) external;
+}
+
 interface IBackTransferable {
     function transferRemainsTo(address destination) external;
 }
