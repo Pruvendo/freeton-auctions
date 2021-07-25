@@ -26,7 +26,7 @@ abstract contract ANCBid is AHasBalance {
 
     function canRevealBid()
     internal inline returns (bool) {
-        return (msg.value == 0) && (address(this).balance >= amount + 3 ton);
+        return (address(this).balance >= amount + 3 ton);
     }
 
     function setUpRevealBidData(TvmCell data) internal inline {}

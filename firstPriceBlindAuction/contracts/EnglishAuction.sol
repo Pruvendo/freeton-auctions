@@ -21,6 +21,7 @@ contract Auction is IAuction {
     uint public startTime;
     uint public biddingDuration;
     uint public transferDuration;
+    uint128 public minimalPrice;
     uint128 public minimalStep;
 
     address public lotGiver;
@@ -53,6 +54,7 @@ contract Auction is IAuction {
         uint startTime_,
         uint biddingDuration_,
         uint transferDuration_,
+        uint128 minimalPrice_,
         uint128 minimalStep_,
 
         address lotGiver_,
@@ -68,6 +70,7 @@ contract Auction is IAuction {
         startTime = startTime_;
         biddingDuration = biddingDuration_;
         transferDuration = transferDuration_;
+        minimalPrice = minimalPrice_;
         minimalStep = minimalStep_;
         lotGiver = lotGiver_;
         bidReciever = bidReciever_;
@@ -84,7 +87,6 @@ contract Auction is IAuction {
         address auction_,
         address lotReciever_
     ) override external {
-
         (
             uint startTime_,
             uint biddingDuration_,
@@ -96,6 +98,7 @@ contract Auction is IAuction {
         require(transferDuration_ == transferDuration, 777);
         require(root_ == root, 777);
         require(auction_ == address(this), 777);
+        require(amount_ >= minimalPrice, 103);
 
         require(addressFitsCode(
             msg.sender,
@@ -110,7 +113,7 @@ contract Auction is IAuction {
     }
 
     function end() override public {
-        require(lotReciever != address(0));
+        require(lotReciever != address(0), 101);
         // TODO tick-tok
         require(now >= (startTime + biddingDuration), 103);
         tvm.accept();

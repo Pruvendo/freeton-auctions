@@ -64,7 +64,12 @@ def test_scenario(
     bidding_duration,
     revealing_duration,
     transfer_duration,
+    pytestconfig
 ):
+    ts4.reset_all()
+    rootpath = pytestconfig.rootpath
+    ts4.init(rootpath.joinpath('contracts/'), verbose=False)
+
     root_contract = make_root_contract()
     lot_giver = make_lot_giver(
         prize,
