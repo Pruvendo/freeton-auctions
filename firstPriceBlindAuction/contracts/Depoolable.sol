@@ -56,7 +56,7 @@ abstract contract Depoolable {
     }
 
     function init() external {
-        require(msg.value >= calcRequiredBalance, ERROR_DEPOOL_NOT_ENOUGH_VALUE);
+        require(msg.value >= calcRequiredBalance(), ERROR_DEPOOL_NOT_ENOUGH_VALUE);
         require(msg.sender == owner, ERROR_DEPOOL_NOT_AUTHORIZED);
         tvm.accept();
         participateInDepools();
