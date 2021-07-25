@@ -6,22 +6,7 @@ from dataclasses import dataclass
 
 
 LOGGER = logging.getLogger(__name__)
-HASH_CALCULATOR = ts4.BaseContract(
-    '__HashCalc',
-    {},
-    balance=10**10,
-)
-ARG_CALCULATOR = ts4.BaseContract(
-    '__NativeCurrencyBidRevealArgCalc',
-    {},
-    balance=10**10,
-)
-CONSTRUCTOR_ARG_CALCULATOR = ts4.BaseContract(
-    '__NativeCurrencyBidConstructorArgCalc',
-    {},
-    balance=10**10,
-)
-ts4.dispatch_messages()
+
 
 @dataclass
 class User:
@@ -34,7 +19,27 @@ class User:
 users: dict[str, User] = {}
 
 
+def make_root_contract():
+    auction_code = ts4.load_code_cell('FirstPriceAuction')
+    giver_code = ts4.load_code_cell('GiverNativeCurrency')
+    bid_code = ts4.load_code_cell('BidNativeCurrencyFirstPrice')
+    return ts4.BaseContract(
+        'AuctionRootFirstPrice',
+        dict(
+            auctionCode_=auction_code,
+            lotGiverCode_=giver_code,
+            bidGiverCode_=bid_code,
+        ),
+        balance=10 ** 12,
+        keypair=ts4.make_keypair(),
+    )
+
 def magic_hash(amount, secret):
+    HASH_CALCULATOR = ts4.BaseContract(
+        '__HashCalc',
+        {},
+        balance=10**10,
+    )
     return HASH_CALCULATOR.call_method(
         'calc',
         dict(
@@ -44,6 +49,11 @@ def magic_hash(amount, secret):
     )
 
 def magic_arg(amount, secret):
+    ARG_CALCULATOR = ts4.BaseContract(
+        '__NativeCurrencyFirstPriceBidRevealArgCalc',
+        {},
+        balance=10**10,
+    )
     return ARG_CALCULATOR.call_method(
         'calc',
         dict(
@@ -56,6 +66,11 @@ def magic_constructor_arg(
     # *,
     **kwargs,
 ):
+    CONSTRUCTOR_ARG_CALCULATOR = ts4.BaseContract(
+        '__NativeCurrencyFirstPriceBidConstructorArgCalc',
+        {},
+        balance=10**10,
+    )
     auc_data, bid_data = CONSTRUCTOR_ARG_CALCULATOR.call_method(
         'calc',
         kwargs,
@@ -224,10 +239,7 @@ def make_lot_giver(
     return ts4.BaseContract(
         'GiverNativeCurrency',
         dict(
-            startTime_=start_time,
-            biddingDuration_=bidding_duration,
-            revealingDuration_=revealing_duration,
-            transferDuration_=transfer_duration,
+            endTime_=start_time+bidding_duration+revealing_duration+transfer_duration,
             root_=root_address,
         ),
         balance=prize,

@@ -8,7 +8,7 @@ import "Interfaces.sol";
 import "AbstractDutchBid.sol";
 import "AbstractNativeCurrencyBid.sol";
 
-contract Bid is IGiver, IBackTransferable, IBid, ANCBid, ADutchBid {
+contract Bid is IBackTransferable, IBid, ANCBid, ADutchBid {
 
     constructor(TvmCell auctionData, TvmCell bidData) public {
         require(tvm.pubkey() != 0, 101);
@@ -38,8 +38,8 @@ contract Bid is IGiver, IBackTransferable, IBid, ANCBid, ADutchBid {
         require(tvm.pubkey() == msg.pubkey(), 102);
         setUpRevealBidData(bidData);
         setUpRevealAuctionData(auctionData);
-        require(canRevealBid(), 102);
-        require(canRevealAuc(), 102);
+        require(canRevealBid(), 777);
+        require(canRevealAuc(), 777);
 
         tvm.accept();
 

@@ -36,7 +36,6 @@ contract Auction is IAuction {
 
     address public bidGiver;
     address public lotReciever;
-    uint128 public winnersPrice;
 
     /*---------------------------------------------------------------------\
     |                                                                      |
@@ -86,10 +85,10 @@ contract Auction is IAuction {
         ) = auctionData.toSlice().decode(uint, uint128, uint128);
         require(now >= startTime, 103);
         require((now - startTime) * priceStep < startPrice, 103);
-        require(amount_ >= startPrice - (now - startTime) * priceStep, 103);
+        require(amount_ >= startPrice - (now - startTime) * priceStep, 104);
         require(startTime_ == startTime, 102);
         require(startPrice_ == startPrice, 102);
-        require(priceStep_ == priceStep, 102);
+        require(priceStep_ == priceStep, 103);
         require(root_ == root, 102);
         require(this == auction_);
 
@@ -97,6 +96,9 @@ contract Auction is IAuction {
             msg.sender,
             msg.pubkey()
         ), 102);
+
+        bidGiver = msg.sender;
+        lotReciever = lotReciever_;
 
         __end();
     }
@@ -116,6 +118,8 @@ contract Auction is IAuction {
             lotReciever: lotReciever,
             data: data
         });
+
+        selfdestruct(root);
     }
 
     function end() override external {

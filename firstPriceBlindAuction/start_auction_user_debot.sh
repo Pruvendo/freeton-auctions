@@ -32,8 +32,8 @@ function nice_echo() {
 # temp=$(../static/tvm_linker decode --tvc Auction.tvc)
 # auc_code=$(echo $temp | grep -oP 'code: \K\S+')
 
-# tondev sol compile AuctionRoot.sol > /dev/null
-# temp=$(../static/tvm_linker decode --tvc AuctionRoot.tvc)
+# tondev sol compile AuctionRootFirstPrice.sol > /dev/null
+# temp=$(../static/tvm_linker decode --tvc AuctionRootFirstPrice.tvc)
 # auc_root_code=$(echo $temp | grep -oP 'code: \K\S+')
 
 # tondev sol compile BidNativeCurrencyFirstPrice.sol > /dev/null
@@ -49,10 +49,10 @@ function nice_echo() {
 # cd ../debots
 # tonos-cli getkeypair ../keyfile.json "$PHRASE"
 
-# tonos-cli genaddr ../contracts/AuctionRoot.tvc ../contracts/AuctionRoot.abi.json \
-#     --setkey ../keyfile.json > AuctionRoot.log
+# tonos-cli genaddr ../contracts/AuctionRootFirstPrice.tvc ../contracts/AuctionRootFirstPrice.abi.json \
+#     --setkey ../keyfile.json > AuctionRootFirstPrice.log
 
-# auc_root_address=$(cat AuctionRoot.log | grep "Raw address:" | cut -d ' ' -f 3)
+# auc_root_address=$(cat AuctionRootFirstPrice.log | grep "Raw address:" | cut -d ' ' -f 3)
 # echo "auc_root_address: $auc_root_address"
 
 
@@ -73,9 +73,9 @@ function nice_echo() {
 
 # nice_echo "5. Deploy Root"
 # tonos-cli --url $NETWORK \
-#     deploy contracts/AuctionRoot.tvc \
+#     deploy contracts/AuctionRootFirstPrice.tvc \
 #     --sign keyfile.json \
-#     --abi contracts/AuctionRoot.abi.json \
+#     --abi contracts/AuctionRootFirstPrice.abi.json \
 #     "{
 #         \"auctionCode_\": \"$auc_code\",
 #         \"lotGiverCode_\": \"$giver_code\",

@@ -7,7 +7,7 @@ pragma AbiHeader pubkey;
 import "FirstPriceAuction.sol";
 import "Interfaces.sol";
 
-contract AuctionRoot is IRoot {
+contract AuctionRootFirstPrice is IRoot {
 
     uint public numberOfAuctions;
     uint public numberOfActiveAuctions;
@@ -44,10 +44,10 @@ contract AuctionRoot is IRoot {
         uint biddingDuration,
         uint revealingDuration,
         uint transferDuration
-    ) override external returns (address auctionAddress) {
+    ) external returns (address auctionAddress) {
         require(msg.pubkey() == tvm.pubkey(), 102);
         require(address(this).balance > END_AUCTION_COST * (numberOfActiveAuctions + 1) + DEPLOY_AUCTION_COST, 104);
-        require(startTime > now, 103);
+        require(startTime > now, 104);
         require(biddingDuration > 0, 103);
         require(revealingDuration > 0, 103);
         require(transferDuration > 0, 103);

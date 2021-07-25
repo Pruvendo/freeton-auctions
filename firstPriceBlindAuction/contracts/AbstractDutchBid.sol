@@ -24,7 +24,9 @@ abstract contract ADutchBid is AHasBalance {
         (root, auction, lotReciever) = cell2.toSlice().decode(address, address, address);
     }
 
-    function correctConstructorsAuctionData() internal inline returns (bool) {}
+    function correctConstructorsAuctionData() internal inline returns (bool) {
+        return true;
+    }
 
     function canTransfer() internal inline returns (bool) {
         return true;
@@ -38,11 +40,13 @@ abstract contract ADutchBid is AHasBalance {
         return true;
     }
 
-    function setUpRevealAuctionData(TvmCell data) internal inline {}
+    function setUpRevealAuctionData(TvmCell data) internal inline {
+        (amount) = data.toSlice().decode(uint128);
+    }
 
     function revealToAuction() internal inline {
         TvmBuilder builder1;
-        builder1.store(startTime, startPrice, lotReciever);
+        builder1.store(startTime, startPrice, priceStep);
         IAuction(auction).revealBid{value: 1 ton}({
             amount_: amount,
 

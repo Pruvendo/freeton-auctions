@@ -27,7 +27,7 @@ struct AuctionScenarioData {
     bool ended;
 }
 
-contract AuctionRootDebot is Debot {
+contract AuctionRootFirstPriceDebot is Debot {
 
     /*---------------------------------------------------------------------\
     |                                                                      |
@@ -54,7 +54,7 @@ contract AuctionRootDebot is Debot {
     function _menu() private {
         string sep = '----------------------------------------';
         Menu.select(
-            sep + "\nAuctionRootDebot menu",
+            sep + "\nAuctionRootFirstPriceDebot menu",
             sep,
             [
                 MenuItem("startAuctionScenario", "",tvm.functionId(startAuctionScenario)),
@@ -141,7 +141,7 @@ contract AuctionRootDebot is Debot {
             Terminal.print(0, "No auctions started yet");
         } else {
             (address key, AuctionScenarioData _) = auctions.min().get();
-            
+
             optional(uint256) none;
             IAuction(key).getUpdateableInfo{
                 abiVer: 2,
@@ -274,7 +274,7 @@ contract AuctionRootDebot is Debot {
     |                            TECHNICAL                                 |
     |                                                                      |
     \---------------------------------------------------------------------*/
-    
+
     bytes m_icon;
 
     function setIcon(bytes icon) public {
@@ -287,7 +287,7 @@ contract AuctionRootDebot is Debot {
         string name, string version, string publisher, string caption, string author,
         address support, string hello, string language, string dabi, bytes icon
     ) {
-        name = "AuctionRootDebot";
+        name = "AuctionRootFirstPriceDebot";
         version = "0.0.1";
         publisher = "Pruvendo";
         caption = "lorem ipsum";

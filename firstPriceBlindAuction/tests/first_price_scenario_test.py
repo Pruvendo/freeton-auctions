@@ -4,15 +4,17 @@ import logging
 import pytest
 import time
 
-from utils import (
+from first_price_utils import (
     dumb_reciever,
     make_bid,
+    make_root_contract,
     reveal_bid,
     take_bid_back,
     balance,
     prize_balance,
     make_auction_contract,
     make_lot_giver,
+    make_root_contract,
 )
 
 
@@ -21,6 +23,7 @@ eq = ts4.eq
 LOGGER = logging.getLogger(__name__)
 
 
+@pytest.mark.order(1)
 @pytest.mark.parametrize(
     '''bids, prize, epsilon, start_time,
         bidding_duration, revealing_duration, transfer_duration''',
@@ -54,7 +57,6 @@ LOGGER = logging.getLogger(__name__)
     ]
 )
 def test_scenario(
-    root_contract,
     bids,
     prize,
     epsilon,
@@ -62,7 +64,13 @@ def test_scenario(
     bidding_duration,
     revealing_duration,
     transfer_duration,
+    pytestconfig
 ):
+    ts4.reset_all()
+    rootpath = pytestconfig.rootpath
+    ts4.init(rootpath.joinpath('contracts/'), verbose=False)
+
+    root_contract = make_root_contract()
     lot_giver = make_lot_giver(
         prize,
         start_time,

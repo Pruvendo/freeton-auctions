@@ -19,8 +19,10 @@ abstract contract AEnglishBid is AHasBalance {
 
     function setUpAuctionSpecificDataConstructor(TvmCell auctionData) internal inline {
 
-        (startTime, biddingDuration, transferDuration) = auctionData
-            .toSlice().decode(uint, uint, uint);
+        (TvmCell cell1, TvmCell cell2)= auctionData.toSlice().decode(TvmCell, TvmCell);
+
+        (startTime, biddingDuration, transferDuration) = cell1.toSlice().decode(uint, uint, uint);
+        (root, auction, lotReciever) = cell2.toSlice().decode(address, address, address);
     }
 
     function correctConstructorsAuctionData()
@@ -41,7 +43,9 @@ abstract contract AEnglishBid is AHasBalance {
             && (now < startTime + biddingDuration);
     }
 
-    function setUpRevealAuctionData(TvmCell data) internal inline {}
+    function setUpRevealAuctionData(TvmCell data) internal inline {
+        (amount) = data.toSlice().decode(uint128);
+    }
 
     function revealToAuction() internal inline {
         TvmBuilder builder;

@@ -6,44 +6,17 @@ pragma AbiHeader pubkey;
 
 import "Interfaces.sol";
 
-contract Giver is IGiver, IBackTransferable {
-    uint public startTime;
-    uint public biddingDuration;
-    uint public revealingDuration;
-    uint public transferDuration;
-    //TODO один лот может быть в нескольких аукционах, починить!!!
-    address public root;
+contract Giver is IGiver {
 
-    constructor(
-        uint startTime_,
-        uint biddingDuration_,
-        uint revealingDuration_,
-        uint transferDuration_,
-        address root_
-    ) public {
+    address public root;
+    uint public endTime;
+
+    constructor(address root_, uint endTime_) public {
         require(tvm.pubkey() != 0, 101);
         require(tvm.pubkey() == msg.pubkey(), 102);
 
-        startTime = startTime_;
-        biddingDuration = biddingDuration_;
-        revealingDuration = revealingDuration_;
-        transferDuration = transferDuration_;
         root = root_;
-    }
-
-    function transferRemainsTo(address destination) override external {
-        require(tvm.pubkey() == msg.pubkey(), 102);
-        require(
-            now >= (startTime + biddingDuration + revealingDuration + transferDuration),
-            103
-        );
-        tvm.accept();
-
-        destination.transfer({
-            value: 0 ton,
-            bounce: false,
-            flag: 128
-        });
+        endTime = endTime_;
     }
 
     function transferTo(address destination) override external {
