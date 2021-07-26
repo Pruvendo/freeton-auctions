@@ -18,16 +18,28 @@ abstract contract ANCBid is AHasBalance, Depoolable {
     function setUpBidSpecificDataConstructor(TvmCell bidData) internal inline {}
 
     function __transferRemains(address destination) internal inline {
-        selfdestruct(destination);
+        if(activeDepool != address(0)) {
+            selfdestruct(destination);
+        }
+        else {
+            terminationStarted = true;
+        }
     }
 
     function __transferTo(address destination) internal inline {
-        destination.transfer(amount, false);
+        if(activeDepool != address(0)) {
+            amountToSendExternally = amount;
+            dest = destination;
+            ended = true;
+        }
+        else {
+            destination.transfer(amount, false);
+        }
     }
 
     function canRevealBid()
     internal inline returns (bool) {
-        return (address(this).balance >= amount + 3 ton);
+        return (activeDepool != address(0) && amountDeposited >= amount) || (address(this).balance >= amount + 3 ton);
     }
 
     function setUpRevealBidData(TvmCell data) internal inline {}
