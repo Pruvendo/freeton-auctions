@@ -36,6 +36,7 @@ contract Auction is IAuction {
 
     address public bidGiver;
     address public lotReciever;
+    uint128 public winnersPrice;
 
     /*---------------------------------------------------------------------\
     |                                                                      |
@@ -99,6 +100,7 @@ contract Auction is IAuction {
 
         bidGiver = msg.sender;
         lotReciever = lotReciever_;
+        winnersPrice = amount_;
 
         __end();
     }

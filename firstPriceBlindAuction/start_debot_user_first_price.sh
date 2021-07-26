@@ -87,9 +87,9 @@ nice_echo "1. Deploy Debot"
 pwd
 ls -la
 cd ./debots
-tondev sol compile DUser.sol
+tondev sol compile DUserFirstPrice.sol
 cd ..
-temp=$(bash deploy_debot.sh debots/DUser.tvc | tail -1)
+temp=$(bash deploy_debot.sh debots/DUserFirstPrice.tvc | tail -1)
 ADDRESS=${temp:6}
 echo "Debot deployed at address: $ADDRESS"
 
