@@ -45,6 +45,8 @@ contract Auction is IAuction, IAuctionFirstPrice {
     |                                                                      |
     \---------------------------------------------------------------------*/
 
+    event NewWinner(address bid, uint128 price);
+
     constructor(
         uint a_id_,
 
@@ -117,6 +119,8 @@ contract Auction is IAuction, IAuctionFirstPrice {
             bidGiver = msg.sender;
             lotReciever = lotReciever_;
             winnersPrice = amount_;
+
+            emit NewWinner(msg.sender, amount_);
         }
     }
 

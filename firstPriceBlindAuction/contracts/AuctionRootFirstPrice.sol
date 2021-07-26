@@ -19,6 +19,9 @@ contract AuctionRootFirstPrice is IRoot {
     uint128 DEPLOY_AUCTION_COST;
     uint128 END_AUCTION_COST;
 
+    event AuctionStarted(address auction);
+    event AuctionEnded(address auction, address winner);
+
     constructor(
         TvmCell auctionCode_,
         TvmCell lotGiverCode_,
@@ -74,6 +77,8 @@ contract AuctionRootFirstPrice is IRoot {
 
         numberOfAuctions += 1;
         numberOfActiveAuctions += 1;
+
+        emit AuctionStarted(auctionAddress);
         return auctionAddress;
     }
 
@@ -91,6 +96,8 @@ contract AuctionRootFirstPrice is IRoot {
         IGiver(bidGiver).transferTo(bidReciever);
         IGiver(lotGiver).transferTo(lotReciever);
         numberOfActiveAuctions -= 1;
+
+        emit AuctionEnded(msg.sender, bidGiver);
     }
 
     function addressFitsCode(
