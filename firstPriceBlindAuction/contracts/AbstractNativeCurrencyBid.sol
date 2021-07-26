@@ -18,7 +18,7 @@ abstract contract ANCBid is AHasBalance, Depoolable {
     function setUpBidSpecificDataConstructor(TvmCell bidData) internal inline {}
 
     function __transferRemains(address destination) internal inline {
-        if(activeDepool != address(0)) {
+        if(activeDepool == address(0)) {
             selfdestruct(destination);
         }
         else {
