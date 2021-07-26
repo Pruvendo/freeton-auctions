@@ -36,6 +36,7 @@ contract Bid is IBackTransferable, IBid, ANCBid, AFPBid {
 
     function reveal(TvmCell bidData, TvmCell auctionData) override external {
         require(tvm.pubkey() == msg.pubkey(), 102);
+        require(msg.value == 0, 102);
         setUpRevealBidData(bidData);
         setUpRevealAuctionData(auctionData);
         require(canRevealBid(), 102);
@@ -44,5 +45,9 @@ contract Bid is IBackTransferable, IBid, ANCBid, AFPBid {
         tvm.accept();
 
         revealToAuction();
+    }
+
+    receive() external {
+        require(false, 104);
     }
 }

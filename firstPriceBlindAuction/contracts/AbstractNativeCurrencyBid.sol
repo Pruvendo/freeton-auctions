@@ -31,8 +31,4 @@ abstract contract ANCBid is AHasBalance, Depoolable {
     }
 
     function setUpRevealBidData(TvmCell data) internal inline {}
-
-    receive() external {
-        require(false, 104);
-    }
 }
