@@ -8,7 +8,7 @@ import "Interfaces.sol";
 import "AbstractEnglishBid.sol";
 import "AbstractNativeCurrencyBid.sol";
 
-contract Bid is IBackTransferable, IBid, ANCBid, AEnglishBid {
+contract Bid is IBackTransferable, IBid, IGiver, ANCBid, AEnglishBid {
 
     constructor(TvmCell auctionData, TvmCell bidData) public {
         require(tvm.pubkey() != 0, 101);

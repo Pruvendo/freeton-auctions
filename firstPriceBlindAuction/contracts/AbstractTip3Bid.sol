@@ -10,8 +10,8 @@ import "Tip3Interfaces.sol";
 
 abstract contract AT3Bid is AHasBalance, ITip3Holder {
 
-    uint128 public balance;
     address public wallet;
+    address public owner;
 
     function correctConstructorsBidData()
     internal inline returns (bool) {
@@ -20,7 +20,7 @@ abstract contract AT3Bid is AHasBalance, ITip3Holder {
 
     function setUpBidSpecificDataConstructor(TvmCell bidData) internal inline {
         balance = 0;
-        (wallet) = bidData.toSlice().decode(address);
+        (wallet, owner) = bidData.toSlice().decode(address, address);
     }
 
     function onTip3LendOwnership(
@@ -31,21 +31,9 @@ abstract contract AT3Bid is AHasBalance, ITip3Holder {
         TvmCell payload,
         address answer_addr
     ) override external {
-        require(verify(wallet_public_key_, owner_addr, payload, answer_addr), 102);
+        require(owner_addr == owner, 102);
         tvm.accept();
         balance += lend_balance;
-    }
-
-    function verify(
-        uint256 wallet_public_key_,
-        address owner_addr,
-        TvmCell payload,
-        address answer_addr
-    ) private inline pure returns (bool) {
-
-        //https://github.com/tonlabs/flex/blob/main/flex/Price.cpp#L303
-
-        return true;
     }
 
     function __transferTo(address destination) internal inline {

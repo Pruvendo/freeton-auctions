@@ -23,26 +23,6 @@ interface IAuction {
     function getInfo() external view returns(address bidGiver_, address lotReciever_, uint128 winnersPrice_);
 }
 
-interface IAuctionFirstPrice {
-    function getAllInfo() external view
-    // returns(
-        // uint startTime_,
-        // uint biddingDuration_,
-        // uint revealingDuration_,
-        // uint transferDuration_,
-
-        // address lotGiver_,
-        // address bidReciever_,
-
-        // address bidGiver_,
-        // address lotReciever_,
-        // uint128 winnersPrice_,
-
-        // address root_
-    // )
-    ;
-}
-
 interface IRoot {
     // IAuction calls setWinner and forces lot <-> bid exchange
     function setWinner(
@@ -70,7 +50,6 @@ interface IBackTransferable {
 
 interface IBid {
     function reveal(TvmCell bidData, TvmCell auctionData) external;
-    function transferTo(address destination) external;
 }
 
 interface IDePool {

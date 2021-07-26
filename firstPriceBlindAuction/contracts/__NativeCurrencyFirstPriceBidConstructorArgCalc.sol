@@ -45,16 +45,6 @@ contract __HashCalc {
             builder1.toCell(),
             builder2.toCell(),
             builder3.toCell()
-            // startTime_,
-            // biddingDuration_,
-            // revealingDuration_
-            // transferDuration_
-
-            // root_,
-            // auction_,
-            // lotReciever_,
-
-            // amountHash_
         );
 
         TvmCell _;

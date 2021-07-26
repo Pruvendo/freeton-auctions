@@ -8,7 +8,7 @@ import "Interfaces.sol";
 import "BidNativeCurrencyFirstPrice.sol";
 
 
-contract Auction is IAuction, IAuctionFirstPrice {
+contract Auction is IAuction {
 
     /*---------------------------------------------------------------------\
     |                                                                      |
@@ -79,12 +79,6 @@ contract Auction is IAuction, IAuctionFirstPrice {
         uint128 amount_,
 
         TvmCell auctionData,
-        // uint256 secret_,
-        // uint256 amountHash_,
-        // uint startTime_,
-        // uint biddingDuration_,
-        // uint revealingDuration_,
-        // uint transferDuration_,
 
         address root_,
         address auction_,
@@ -181,35 +175,5 @@ contract Auction is IAuction, IAuctionFirstPrice {
         bidGiver_ = bidGiver;
         lotReciever_ = lotReciever_;
         winnersPrice_ = winnersPrice;
-    }
-
-    function getAllInfo() override external view
-        // returns(
-        // uint startTime_,
-        // uint biddingDuration_,
-        // uint revealingDuration_,
-        // uint transferDuration_,
-
-        // address lotGiver_,
-        // address bidReciever_,
-
-        // address bidGiver_,
-        // address lotReciever_,
-        // uint128 winnersPrice_,
-
-        // address root_
-    // )
-    {
-        // tvm.accept();
-        // startTime_ = startTime;
-        // biddingDuration_ = biddingDuration;
-        // revealingDuration_ = revealingDuration;
-        // transferDuration_ = transferDuration;
-        // lotGiver_ = lotGiver;
-        // bidReciever_ = bidReciever;
-        // bidGiver_ = bidGiver;
-        // lotReciever_ = lotReciever;
-        // winnersPrice_ = winnersPrice;
-        // root_ = root;
     }
 }

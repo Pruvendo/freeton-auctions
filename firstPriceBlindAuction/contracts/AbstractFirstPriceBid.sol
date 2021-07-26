@@ -83,12 +83,6 @@ abstract contract AFPBid is AHasBalance {
             amount_: amount,
 
             auctionData: builder3.toCell(),
-            // secret_: secret,
-            // amountHash_: amountHash,
-            // startTime_: startTime,
-            // biddingDuration_: biddingDuration,
-            // revealingDuration_: revealingDuration,
-            // transferDuration_: transferDuration,
 
             root_: root,
             auction_: auction,

@@ -49,22 +49,9 @@ contract Bid is IGiver, ITip3Holder {
         TvmCell payload,
         address answer_addr
     ) override external {
-        require(verify(wallet_public_key_, owner_addr, payload, answer_addr), 102);
         require(lend_finish_time >= startTime + biddingDuration + revealingDuration + transferDuration, 103);
         tvm.accept();
         balance += lend_balance;
-    }
-
-    function verify(
-        uint256 wallet_public_key_,
-        address owner_addr,
-        TvmCell payload,
-        address answer_addr
-    ) private inline pure returns (bool) {
-
-        //https://github.com/tonlabs/flex/blob/main/flex/Price.cpp#L303
-
-        return true;
     }
 
     function transferTo(address destination) override external {
