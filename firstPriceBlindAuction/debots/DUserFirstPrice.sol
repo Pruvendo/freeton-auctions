@@ -80,7 +80,7 @@ contract AuctionUserDebot is Debot {
 
     function __callGetAuctionInfoBeforePrint(address addr) public {
         optional(uint256) none;
-        IAuction(addr).getAllInfo{
+        IAuctionFirstPrice(addr).getAllInfo{
             abiVer: 2,
             extMsg: true,
             sign: false,
@@ -93,32 +93,30 @@ contract AuctionUserDebot is Debot {
     }
 
     function __printAuctionInfo(
-        uint startTime,
-        uint biddingDuration,
-        uint revealingDuration,
-        uint transferDuration,
+        // uint startTime_,
+        // uint biddingDuration_,
+        // uint revealingDuration_,
+        // uint transferDuration_,
 
-        address lotGiver,
-        address bidReciever,
+        // address lotGiver_,
+        // address bidReciever_,
 
-        address bidGiver,
-        address lotReciever,
-        uint128 amount,
+        // address bidGiver_,
+        // address lotReciever_,
+        // uint128 winnersPrice_,
 
-        address root,
-        bool ended
+        // address root_
     ) public {
-        Terminal.print(0, format("  Auction's address: {}", msg.sender));
-        Terminal.print(0, format("    Auction's lotGiver: {}", lotGiver));
-        Terminal.print(0, format("    Auction's bidReciever: {}", bidReciever));
-        Terminal.print(0, format("    Auction's winner.bidGiver: {}", bidGiver));
-        Terminal.print(0, format("    Auction's winner.lotReciever: {}", lotReciever));
-        Terminal.print(0, format("    Auction's winner.amount: {}", amount));
-        Terminal.print(0, format("    Auction's startTime: {}", startTime));
-        Terminal.print(0, format("    Auction's biddingDuration: {}", biddingDuration));
-        Terminal.print(0, format("    Auction's revealingDuration: {}", revealingDuration));
-        Terminal.print(0, format("    Auction's transferDuration: {}", transferDuration));
-        Terminal.print(0, format("    Auction ended: {}", ended ? "yes" : "no"));
+        // Terminal.print(0, format("  Auction's address: {}", msg.sender));
+        // Terminal.print(0, format("    Auction's lotGiver: {}", lotGiver_));
+        // Terminal.print(0, format("    Auction's bidReciever: {}", bidReciever_));
+        // Terminal.print(0, format("    Auction's winner.bidGiver: {}", bidGiver_));
+        // Terminal.print(0, format("    Auction's winner.lotReciever: {}", lotReciever_));
+        // Terminal.print(0, format("    Auction's winner.amount: {}", winnersPrice_));
+        // Terminal.print(0, format("    Auction's startTime: {}", startTime_));
+        // Terminal.print(0, format("    Auction's biddingDuration: {}", biddingDuration_));
+        // Terminal.print(0, format("    Auction's revealingDuration: {}", revealingDuration_));
+        // Terminal.print(0, format("    Auction's transferDuration: {}", transferDuration_));
         _menu();
     }
 
@@ -141,7 +139,7 @@ contract AuctionUserDebot is Debot {
     function __callGetAuctionInfoBeforeBid(address addr) public {
         __auction = addr;
         optional(uint256) none;
-        IAuction(__auction).getAllInfo{
+        IAuctionFirstPrice(__auction).getAllInfo{
             abiVer: 2,
             extMsg: true,
             sign: false,
