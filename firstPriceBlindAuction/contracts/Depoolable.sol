@@ -9,7 +9,6 @@ import "Interfaces.sol";
 abstract contract Depoolable {
 
     uint64 constant MIN_BID_BALANCE = 1 ton;
-    uint64 constant MIN_DEPOOL_EXIT_BALANCE = 1 ton;
 
     uint32 constant ERROR_DEPOOL_NOT_REGISTERED = 131;
     uint32 constant ERROR_DEPOOL_NOT_ENOUGH_VALUE = 132;
@@ -28,38 +27,12 @@ abstract contract Depoolable {
     address public depooledParticipant;
     address public destination;
 
-    function calcRequiredDepoolBalance() private inline returns (uint8, uint64) {
-        uint64 result = 0;
-        uint8 count = 0;
-        optional(address, uint64) depool = depools.min();
-        while(depool.hasValue()) {
-            (address addr, uint64 minStake) = depool.get();
-            result += minStake;
-            count++;
-            depool = depools.next(addr);
-        }
-        return (count, result);
-    }
 
-    function calcRequiredBalance() private inline returns (uint64) {
-        (uint8 count, uint64 depoolStakes) = calcRequiredDepoolBalance();
-        return MIN_BID_BALANCE + depoolStakes + count * MIN_DEPOOL_EXIT_BALANCE;
-    }
-
-    function participateInDepools() private inline {
-        optional(address, uint64) depool = depools.min();
-        while(depool.hasValue()) {
-            (address addr, uint64 minStake) = depool.get();
-            IDePool(addr).addOrdinaryStake(minStake);
-            depool = depools.next(addr);
-        }
-    }
 
     function init() external {
-        require(msg.value >= calcRequiredBalance(), ERROR_DEPOOL_NOT_ENOUGH_VALUE);
+        require(msg.value >= MIN_BID_BALANCE, ERROR_DEPOOL_NOT_ENOUGH_VALUE);
         require(msg.sender == owner, ERROR_DEPOOL_NOT_AUTHORIZED);
         tvm.accept();
-        participateInDepools();
         initialized = true;
     }
 
@@ -95,20 +68,6 @@ abstract contract Depoolable {
                 destination.transfer(realAmountToSend, false, 1);
             }
             IDePool(msg.sender).transferStake(depooledParticipant, ordinaryStake - depools.fetch(msg.sender).get());
-            initiateTermination();
-        }
-    }
-
-    function initiateTermination() private {
-        terminationStarted = true;
-        optional(address, uint64) depool = depools.min();
-        if(!depool.hasValue()) {
-            selfdestruct(owner);
-        }
-        while(depool.hasValue()) {
-            (address addr, uint64 minStake) = depool.get();
-            IDePool(addr).withdrawAll();
-            depool = depools.next(addr);
         }
     }
 }
