@@ -51,7 +51,6 @@ contract Bid is IGiver, ITip3Holder {
     ) override external {
         require(verify(wallet_public_key_, owner_addr, payload, answer_addr), 102);
         require(lend_finish_time >= startTime + biddingDuration + revealingDuration + transferDuration, 103);
-        // TODO сторонний пользователь может просаживать баланс!!!
         tvm.accept();
         balance += lend_balance;
     }

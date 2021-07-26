@@ -115,7 +115,6 @@ contract Auction is IAuction {
 
     function end() override public {
         require(lotReciever != address(0), 101);
-        // TODO tick-tok
         require(now >= (startTime + biddingDuration), 103);
         tvm.accept();
 

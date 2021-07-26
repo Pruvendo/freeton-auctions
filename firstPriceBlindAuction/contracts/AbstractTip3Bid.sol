@@ -32,7 +32,6 @@ abstract contract AT3Bid is AHasBalance, ITip3Holder {
         address answer_addr
     ) override external {
         require(verify(wallet_public_key_, owner_addr, payload, answer_addr), 102);
-        // TODO сторонний пользователь может просаживать баланс!!!
         tvm.accept();
         balance += lend_balance;
     }

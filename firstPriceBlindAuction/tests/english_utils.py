@@ -117,7 +117,6 @@ def make_bid(
 
 def reveal_bid(amount, username, expect_ec=0):
     ts4.dispatch_messages()
-    # TODO increase existing bids
     user = users[username]
     bid = user.bid_giver
     bid.call_method(
