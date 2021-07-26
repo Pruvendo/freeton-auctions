@@ -12,12 +12,12 @@ import "../libs/AddressInput.sol";
 import "../libs/AmountInput.sol";
 import "../contracts/Interfaces.sol";
 
-struct AuctionScenarioData {
+struct FirstPriceAuctionScenarioData {
     address lotGiver;
     address bidGiver;
     address lotReciever;
     address bidReciever;
-    uint128 amount;
+    uint128 winnersPrice;
 
     uint startTime;
     uint biddingDuration;
@@ -25,6 +25,17 @@ struct AuctionScenarioData {
     uint transferDuration;
 
     bool ended;
+}
+
+interface IFirstPriceRoot {
+    function startAuctionScenario(
+        address lotGiver,
+        address bidReciever,
+        uint startTime,
+        uint biddingDuration,
+        uint revealingDuration,
+        uint transferDuration
+    ) external returns (address auctionAddress);
 }
 
 contract AuctionRootFirstPriceDebot is Debot {
@@ -37,7 +48,7 @@ contract AuctionRootFirstPriceDebot is Debot {
 
     address root;
     uint256 publicKey;
-    mapping(address => AuctionScenarioData) auctions;
+    mapping(address => FirstPriceAuctionScenarioData) auctions;
 
     /*---------------------------------------------------------------------\
     |                                                                      |
@@ -77,12 +88,12 @@ contract AuctionRootFirstPriceDebot is Debot {
         address auction
     ) public {
         address none;
-        auctions[auction] = AuctionScenarioData({
+        auctions[auction] = FirstPriceAuctionScenarioData({
             lotGiver: __lotGiver,
             bidGiver: none,
             lotReciever: none,
             bidReciever: __bidReciever,
-            amount: 0,
+            winnersPrice: 0,
 
             startTime: __startTime,
             biddingDuration: __biddingDuration,
@@ -116,16 +127,16 @@ contract AuctionRootFirstPriceDebot is Debot {
         } else {
             Terminal.print(0, "Auctions:");
             address key = address(0);
-            (address max_key, AuctionScenarioData _) = auctions.max().get();
-            AuctionScenarioData value;
+            (address max_key, FirstPriceAuctionScenarioData _) = auctions.max().get();
+            FirstPriceAuctionScenarioData value;
             do {
                 (key, value) = auctions.next(key).get();
                 Terminal.print(0, format("  Auction's address: {}", key));
                 Terminal.print(0, format("    Auction's lotGiver: {}", value.lotGiver));
                 Terminal.print(0, format("    Auction's bidReciever: {}", value.bidReciever));
-                Terminal.print(0, format("    Auction's winner.bidGiver: {}", value.bidGiver));
-                Terminal.print(0, format("    Auction's winner.lotReciever: {}", value.lotReciever));
-                Terminal.print(0, format("    Auction's winner.amount: {}", value.amount));
+                Terminal.print(0, format("    Auction winner's bidGiver: {}", value.bidGiver));
+                Terminal.print(0, format("    Auction winner's lotReciever: {}", value.lotReciever));
+                Terminal.print(0, format("    Auction winner's price: {}", value.winnersPrice));
                 Terminal.print(0, format("    Auction's startTime: {}", value.startTime));
                 Terminal.print(0, format("    Auction's biddingDuration: {}", value.biddingDuration));
                 Terminal.print(0, format("    Auction's revealingDuration: {}", value.revealingDuration));
@@ -140,10 +151,10 @@ contract AuctionRootFirstPriceDebot is Debot {
         if (auctions.empty()) {
             Terminal.print(0, "No auctions started yet");
         } else {
-            (address key, AuctionScenarioData _) = auctions.min().get();
+            (address key, FirstPriceAuctionScenarioData _) = auctions.min().get();
 
             optional(uint256) none;
-            IAuction(key).getUpdateableInfo{
+            IAuction(key).getInfo{
                 abiVer: 2,
                 extMsg: true,
                 sign: false,
@@ -235,7 +246,7 @@ contract AuctionRootFirstPriceDebot is Debot {
 
     function __saveTransferDuration(uint256 value) public {
         __transferDuration = uint(value);
-        IRoot(root).startAuctionScenario{
+        IFirstPriceRoot(root).startAuctionScenario{
             abiVer: 2,
             extMsg: true,
             sign: true,
@@ -254,17 +265,12 @@ contract AuctionRootFirstPriceDebot is Debot {
         });
     }
 
-    function updateInfo_(
-        address bidGiver,
-        address lotReciever,
-        uint128 amount,
-        bool ended
-    ) public {
+    function updateInfo_(address bidGiver_, address lotReciever_, uint128 winnersPrice_) public {
         if (auctions.exists(msg.sender)) {
-            auctions[msg.sender].bidGiver = bidGiver;
-            auctions[msg.sender].lotReciever = lotReciever;
-            auctions[msg.sender].amount = amount;
-            auctions[msg.sender].ended = ended;
+
+            auctions[msg.sender].bidGiver = bidGiver_;
+            auctions[msg.sender].lotReciever = lotReciever_;
+            auctions[msg.sender].winnersPrice = winnersPrice_;
         }
         _menu();
     }

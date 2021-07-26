@@ -20,29 +20,7 @@ interface IAuction {
         address lotReciever_
     ) external;
 
-    // function getUpdateableInfo() external view returns(
-    //     address bidGiver,
-    //     address lotReciever,
-    //     uint128 amount,
-    //     bool ended
-    // );
-
-    // function getAllInfo() external view returns(
-    //     uint startTime_,
-    //     uint biddingDuration_,
-    //     uint revealingDuration_,
-    //     uint transferDuration_,
-
-    //     address lotGiver_,
-    //     address bidReciever_,
-
-    //     address bidGiver_,
-    //     address lotReciever_,
-    //     uint128 amount_,
-
-    //     address root_,
-    //     bool ended_
-    // );
+    function getInfo() external view returns(address bidGiver_, address lotReciever_, uint128 winnersPrice_);
 }
 
 interface IRoot {
@@ -54,15 +32,6 @@ interface IRoot {
         address lotReciever,
         TvmCell data
     ) external;
-
-    // function startAuctionScenario(
-    //     address lotGiver,
-    //     address bidReciever,
-    //     uint startTime,
-    //     uint biddingDuration,
-    //     uint revealingDuration,
-    //     uint transferDuration
-    // ) external returns (address auctionAddress);
 }
 
 interface IGiver {

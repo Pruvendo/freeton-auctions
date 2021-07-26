@@ -151,4 +151,9 @@ contract Auction is IAuction {
         address addr = address(tvm.hash(stateInit));
         return addr == sender;
     }
+    function getInfo() override external view returns(address bidGiver_, address lotReciever_, uint128 winnersPrice_) {
+        bidGiver_ = bidGiver;
+        lotReciever_ = lotReciever_;
+        winnersPrice_ = winnersPrice;
+    }
 }

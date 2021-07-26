@@ -5,11 +5,15 @@ NETWORK="http://127.0.0.1"
 GIVER_ADDRESS=0:d5f5cfc4b52d2eb1bd9d3a8e51707872c7ce0c174facddd0e06ae5ffd17d2fcd
 
 function nice_echo() {
-    local w=$(tput cols)
-    python -c "s=\"#\"*(($w - len(\"$1\"))//2 - 1);print(\"\n\" + s + (\" $1 \" if \"$1\" else \"###\") + s)"
-}
+    local w=$(tput cols);
+    python -c "s=\"#\"*(($w - len(\"$1\"))//2 - 1);print(\"\n\" + s + (\" $1 \" if \"$1\" else \"###\") + s)";
+};
+
+START_PATH=$(pwd);
 
 trap "
+    set +e;
+    cd $START_PATH;
     rm contracts/*.json;
     rm contracts/*.tvc;
     rm debots/*.json;
@@ -17,7 +21,8 @@ trap "
     rm debots/*.log;
     rm *.log;
     rm *.json;
-" EXIT
+    set -e
+" ERR EXIT SIGINT SIGTERM KILL
 
 nice_echo "1. Generate keys"
 # tondev se reset ПАЧИМУ???????
@@ -29,7 +34,7 @@ tonos-cli getkeypair keyfile.json "$PHRASE"
 nice_echo "2. Compile contracts"
 cd ./contracts
 tondev sol compile FirstPriceAuction.sol > /dev/null
-temp=$(../static/tvm_linker decode --tvc Auction.tvc)
+temp=$(../static/tvm_linker decode --tvc FirstPriceAuction.tvc)
 auc_code=$(echo $temp | grep -oP 'code: \K\S+')
 
 tondev sol compile AuctionRootFirstPrice.sol > /dev/null
@@ -93,9 +98,9 @@ nice_echo "6. Deploy Debot"
 pwd
 ls -la
 cd ./debots
-tondev sol compile DRoot.sol
+tondev sol compile DRootFirstPrice.sol
 cd ..
-temp=$(bash deploy_debot.sh debots/DRoot.tvc | tail -1)
+temp=$(bash deploy_debot.sh debots/DRootFirstPrice.tvc | tail -1)
 ADDRESS=${temp:6}
 nice_echo "AUTH INFO"
 echo "auc_root_address: $auc_root_address"
