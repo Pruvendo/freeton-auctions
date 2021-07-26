@@ -1,0 +1,228 @@
+{
+	"ABI version": 2,
+	"header": ["pubkey", "time", "expire"],
+	"functions": [
+		{
+			"name": "constructor",
+			"inputs": [
+				{"name":"auctionData","type":"cell"},
+				{"name":"bidData","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "transferRemainsTo",
+			"inputs": [
+				{"name":"destination","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "transferTo",
+			"inputs": [
+				{"name":"destination","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "reveal",
+			"inputs": [
+				{"name":"bidData","type":"cell"},
+				{"name":"auctionData","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "init",
+			"inputs": [
+				{"name":"_depools","type":"map(address,bool)"},
+				{"name":"_owner","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onTransfer",
+			"inputs": [
+				{"name":"source","type":"address"},
+				{"name":"amount_","type":"uint128"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onRoundComplete",
+			"inputs": [
+				{"name":"roundId","type":"uint64"},
+				{"name":"reward","type":"uint64"},
+				{"name":"ordinaryStake","type":"uint64"},
+				{"name":"vestingStake","type":"uint64"},
+				{"name":"lockStake","type":"uint64"},
+				{"name":"reinvest","type":"bool"},
+				{"name":"reason","type":"uint8"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "amount",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"amount","type":"uint128"}
+			]
+		},
+		{
+			"name": "balance",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"balance","type":"uint128"}
+			]
+		},
+		{
+			"name": "minBalance",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"minBalance","type":"uint128"}
+			]
+		},
+		{
+			"name": "depools",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"depools","type":"map(address,bool)"}
+			]
+		},
+		{
+			"name": "activeDepool",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"activeDepool","type":"address"}
+			]
+		},
+		{
+			"name": "initialized",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"initialized","type":"bool"}
+			]
+		},
+		{
+			"name": "ended",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"ended","type":"bool"}
+			]
+		},
+		{
+			"name": "terminationStarted",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"terminationStarted","type":"bool"}
+			]
+		},
+		{
+			"name": "amountDeposited",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"amountDeposited","type":"uint128"}
+			]
+		},
+		{
+			"name": "amountToSendExternally",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"amountToSendExternally","type":"uint128"}
+			]
+		},
+		{
+			"name": "depooledParticipant",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"depooledParticipant","type":"address"}
+			]
+		},
+		{
+			"name": "dest",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"dest","type":"address"}
+			]
+		},
+		{
+			"name": "owner",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"owner","type":"address"}
+			]
+		},
+		{
+			"name": "startTime",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"startTime","type":"uint256"}
+			]
+		},
+		{
+			"name": "biddingDuration",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"biddingDuration","type":"uint256"}
+			]
+		},
+		{
+			"name": "transferDuration",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"transferDuration","type":"uint256"}
+			]
+		},
+		{
+			"name": "root",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"root","type":"address"}
+			]
+		},
+		{
+			"name": "auction",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"auction","type":"address"}
+			]
+		},
+		{
+			"name": "lotReciever",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"lotReciever","type":"address"}
+			]
+		}
+	],
+	"data": [
+	],
+	"events": [
+	]
+}
